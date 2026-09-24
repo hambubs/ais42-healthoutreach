@@ -3,53 +3,102 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MMU Hub — online sync</title>
+<title>MMU Hub — Sync Offline Alerts</title>
 <style>
-:root{--bg:#0b1220;--card:#16233d;--accent:#22d3a7;--text:#e8eefc;--blue:#3b82f6}
+:root{--bg:#0b1220;--card:#16233d;--accent:#22d3a7;--text:#e8eefc;--red:#e74c3c;--muted:#8ea0c0}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui;background:var(--bg);color:var(--text);padding:16px}
-h1{font-size:16px;margin-bottom:2px}
-.sub{font-size:11px;color:#8ea0c0;margin-bottom:14px}
-button{background:var(--accent);color:#04241b;border:none;border-radius:8px;padding:12px;font-weight:700;width:100%;margin:8px 0;cursor:pointer}
+body{font-family:system-ui;background:var(--bg);color:var(--text);padding:20px;max-width:600px;margin:0 auto}
+h1{font-size:20px;margin-bottom:4px}
+.sub{font-size:12px;color:var(--muted);margin-bottom:20px}
+.step{background:var(--card);border:1px solid #1e2a44;border-radius:10px;padding:16px;margin:12px 0}
+.step h2{font-size:14px;color:var(--accent);margin-bottom:8px}
+.step p{font-size:13px;line-height:1.5;margin-bottom:8px}
+.step .num{display:inline-block;background:var(--accent);color:#04241b;border-radius:50%;width:22px;height:22px;text-align:center;line-height:22px;font-weight:700;font-size:12px;margin-right:8px}
+textarea{width:100%;height:120px;background:var(--card);color:var(--text);border:2px dashed var(--accent);border-radius:8px;padding:12px;font-size:13px;font-family:monospace;margin:8px 0}
+textarea:focus{outline:none;border-color:var(--accent)}
+textarea::placeholder{color:var(--muted);font-family:system-ui;font-size:13px}
+button{background:var(--accent);color:#04241b;border:none;border-radius:8px;padding:14px;font-weight:700;font-size:14px;width:100%;margin:8px 0;cursor:pointer}
+button:hover{filter:brightness(1.1)}
 button.alt{background:var(--card);color:var(--text);border:1px solid #1e2a44}
-textarea{width:100%;height:170px;background:var(--card);color:var(--text);border:1px solid #1e2a44;border-radius:8px;padding:8px;font-size:11px}
-.ok{color:var(--accent);font-weight:700;margin-top:10px}
-.err{color:#e74c3c;font-weight:700;margin-top:10px}
-.note{font-size:11px;color:#8ea0c0;margin-top:10px;line-height:1.5}
+.ok{color:var(--accent);font-weight:700;margin-top:12px;font-size:14px}
+.err{color:var(--red);font-weight:700;margin-top:12px;font-size:14px}
+.note{font-size:11px;color:var(--muted);margin-top:16px;line-height:1.5}
+.hint-box{background:rgba(34,211,167,0.08);border:1px solid var(--accent);border-radius:8px;padding:10px 14px;margin:8px 0;font-size:12px;line-height:1.5}
 </style>
 </head>
 <body>
-<h1>📡 MMU Hub — online sync</h1>
-<div class="sub">Paste the offline queue JSON pulled from the gateway — it will sync to the command console</div>
-<textarea id="payload" placeholder='[{"type":"maternal","priority":"critical","node":"VIL-A1B2","ts":123456,"ct_sig":"9F3C21AB"}]'></textarea>
-<button onclick="sync()">&#128228; Sync to HealthOutreach server</button>
-<button class="alt" onclick="demoFill()">&#129300; Fill demo payload (no gateway handy)</button>
-<div id="msg"></div>
-<div class="note">
-  Flow: tablet on <b>MMU-GATEWAY</b> Wi-Fi → open <b>192.168.4.1/hub</b> → Pull → Copy JSON →
-  reconnect to the internet → open this page → paste → Sync. Alerts then appear live on the Ops Console feed.
+<h1>📡 MMU Hub — Sync Offline Alerts</h1>
+<p class="sub">Transfer emergency SOS alerts from the offline ESP32 gateway to the command console</p>
+
+<div class="step">
+  <h2><span class="num">1</span> Copy from the tablet</h2>
+  <p>On the tablet (while connected to <b>MMU-GATEWAY</b> Wi-Fi), open <code>192.168.4.1/hub</code>,
+  tap <b>Pull alerts</b>, then tap <b>Copy JSON</b>.</p>
 </div>
+
+<div class="step">
+  <h2><span class="num">2</span> Paste below and sync</h2>
+  <p>Switch the tablet to your internet Wi-Fi, then paste the copied data here:</p>
+  <textarea id="payload" placeholder="Paste the data you copied from the tablet here — just tap and paste (Ctrl+V or long-press → Paste)"></textarea>
+  <button onclick="sync()">📤 Sync to Command Console</button>
+  <button class="alt" onclick="demoFill()">📋 No gateway handy? Fill with sample data</button>
+  <div id="msg"></div>
+</div>
+
+<div class="hint-box">
+  💡 <b>What happens when you click Sync?</b><br>
+  The alerts are sent to the command console and appear instantly in the live SOS feed
+  on the map. Each alert shows the emergency type, priority, and the AI's recommended
+  dispatch mode (ambulance, UAV, helicopter, etc.).
+</div>
+
+<div class="note">
+  <b>Full offline demo flow:</b><br>
+  1. Phone in airplane mode → joins MMU-GATEWAY Wi-Fi → captive portal → tap SOS<br>
+  2. Tablet on MMU-GATEWAY → 192.168.4.1/hub → Pull → Copy<br>
+  3. Tablet switches to internet Wi-Fi → open this page → Paste → Sync<br>
+  4. Alert appears live on the command console 🎉
+</div>
+
 <script>
 const msg = (t, ok) => { document.getElementById('msg').innerHTML =
   '<div class="' + (ok ? 'ok' : 'err') + '">' + t + '</div>'; };
 
 async function sync() {
+  let raw = document.getElementById('payload').value.trim();
+  if (!raw) return msg('Please paste the data from your tablet first (step 1 above)', false);
+
+  // Auto-parse: try JSON array, JSON object with alerts, or raw text
   let alerts;
-  try { alerts = JSON.parse(document.getElementById('payload').value); }
-  catch (e) { return msg('Invalid JSON — copy the payload again from the gateway hub page', false); }
-  if (!Array.isArray(alerts) || !alerts.length) return msg('Nothing to sync', false);
+  try {
+    let parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      alerts = parsed;
+    } else if (parsed.alerts && Array.isArray(parsed.alerts)) {
+      alerts = parsed.alerts;
+    } else if (parsed.type) {
+      alerts = [parsed];
+    } else {
+      throw new Error('not a recognized format');
+    }
+  } catch (e) {
+    return msg('That doesn\'t look like valid data. Make sure you copied from the tablet hub page (step 1).', false);
+  }
+
+  if (!alerts.length) return msg('No alerts found in the data', false);
+
   try {
     const r = await fetch('/api/sync', { method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ alerts: alerts.map(a => ({
-        node_id: a.node || 'VIL-UNKNOWN',
-        sos_type: a.type || 'routine',
+        node_id: a.node || a.node_id || 'VIL-UNKNOWN',
+        sos_type: a.type || a.sos_type || 'routine',
         priority: a.priority || 'normal',
         lat: a.lat ?? null, lon: a.lon ?? null,
         source: 'hub_sync' })) }) });
     const j = await r.json();
     if (!r.ok) throw new Error(j.error || r.statusText);
-    msg('✅ Synced ' + j.synced + ' offline alert(s) — check the Ops Console feed', true);
+    msg('✅ ' + j.synced + ' alert(s) synced — check the live SOS feed on the console!', true);
     document.getElementById('payload').value = '';
   } catch (e) { msg('Sync failed: ' + e.message, false); }
 }
@@ -58,6 +107,7 @@ function demoFill() {
   document.getElementById('payload').value = JSON.stringify([
     { type: 'maternal', priority: 'critical', node: 'VIL-DEMO1', ts: 900001, ct_sig: '5FA2C910' },
     { type: 'trauma',   priority: 'critical', node: 'VIL-DEMO2', ts: 900002, ct_sig: '77B1E03D' }]);
+  msg('Sample data filled — click Sync to test', true);
 }
 </script>
 </body>

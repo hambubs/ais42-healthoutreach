@@ -591,30 +591,53 @@ async function dispatchTo(lat, lon, road, risk) {
   dispatch({ lat: +lat, lon: +lon }, mode);
 }
 
-/* ------------------------------------------------------------ demo triggers */
-async function demoSos() {
-  const pool = villagesData.filter((v) => v.Underserved_Area_Flag_bin);
-  if (!pool.length) return toast("No underserved villages loaded yet");
-  const v = pool[Math.floor(Math.random() * pool.length)];
-  const types = ["trauma", "maternal", "medicine", "poisoning", "water_contamination", "natural_hazard"];
-  const type = types[Math.floor(Math.random() * types.length)];
-  const r = await api("/api/sos-alert", {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      node_id: "VIL-" + v.Village_ID, village_id: v.Village_ID, sos_type: type,
-      priority: type === "medicine" ? "high" : "critical",
-      lat: v.Latitude, lon: v.Longitude, source: "demo",
-    }),
+/* ------------------------------------------------------- SOS form */
+function populateVillageSelect() {
+  const sel = document.getElementById("sos-village");
+  if (!sel || !villagesData.length) return;
+  const under = villagesData.filter((v) => v.Underserved_Area_Flag_bin);
+  under.slice(0, 200).forEach((v) => {
+    const opt = document.createElement("option");
+    opt.value = v.Village_ID;
+    opt.textContent = `${v.Village_ID} · ${v.District} (${fmt(v.Population)})`;
+    sel.appendChild(opt);
   });
-  toast(`🆘 SOS from ${v.Village_ID} (${v.District}) — ${type}` +
-        (r.recommended_mode ? ` → recommend ${r.recommended_mode}` : ""));
-  pollSos();
+}
+
+async function submitSosForm() {
+  const type = document.getElementById("sos-type").value;
+  const priority = document.getElementById("sos-priority").value;
+  const villageId = document.getElementById("sos-village").value;
+  let lat = null, lon = null, vid = villageId || null;
+
+  if (!villageId) {
+    const pool = villagesData.filter((v) => v.Underserved_Area_Flag_bin);
+    if (!pool.length) return toast("No villages loaded yet");
+    const v = pool[Math.floor(Math.random() * pool.length)];
+    lat = v.Latitude; lon = v.Longitude; vid = v.Village_ID;
+  } else {
+    const v = villagesById.get(villageId);
+    if (v) { lat = v.Latitude; lon = v.Longitude; }
+  }
+
+  try {
+    const r = await api("/api/sos-alert", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        node_id: "CONSOLE-OPS", village_id: vid, sos_type: type,
+        priority, lat, lon, source: "console",
+      }),
+    });
+    toast(`🆘 SOS submitted — ${type}${r.recommended_mode ? ` → suggest ${r.recommended_mode}` : ""}`);
+    pollSos();
+  } catch (e) { toast("SOS failed: " + e.message); }
 }
 
 /* -------------------------------------------------------------- UI wiring */
 function bindControls() {
   document.getElementById("btn-optimize").onclick = runOptimize;
-  document.getElementById("btn-demo-sos").onclick = demoSos;
+  document.getElementById("btn-sos").onclick = submitSosForm;
+  populateVillageSelect();
   const sb = document.getElementById("search-box");
   if (sb) sb.addEventListener("keydown", (e) => { if (e.key === "Enter") doSearch(sb.value); });
   document.getElementById("fleet").oninput = (e) => (document.getElementById("fleet-val").textContent = e.target.value);
