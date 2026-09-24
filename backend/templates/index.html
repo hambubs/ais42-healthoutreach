@@ -16,9 +16,6 @@
   </div>
   <a class="nav-tab" href="http://localhost:8501" target="_blank" title="Open the Impact Dashboard">📊 Impact Dashboard ↗</a>
   <div id="kpis">
-    <div class="kpi"><div class="label">30-min coverage</div><div class="value" id="kpi-coverage">13.82%</div></div>
-    <div class="kpi"><div class="label">Scheduled care</div><div class="value" id="kpi-sched">13.82%</div></div>
-    <div class="kpi"><div class="label">Underserved</div><div class="value red" id="kpi-under">2,611</div></div>
     <div class="kpi"><div class="label">Live SOS</div><div class="value red" id="kpi-sos">0</div></div>
     <div class="kpi"><div class="label">Mesh status</div><div class="value" id="mesh-mode">🟢 Online</div><div class="hint" id="mesh-queue">✓ synced</div></div>
   </div>
@@ -61,7 +58,7 @@
     <div class="section">
       <h2>Demo Triggers</h2>
       <button class="secondary" id="btn-demo-sos">🆘 Simulate Village SOS</button>
-      <button class="secondary" id="btn-demo-sync">📡 Simulate Hub Sync (offline flush)</button>
+      <div class="hint">Real offline flow: phone → MMU-GATEWAY Wi-Fi → tablet /hub → laptop /hub sync</div>
     </div>
 
     <div class="section">

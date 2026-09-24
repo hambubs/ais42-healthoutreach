@@ -252,6 +252,37 @@ def api_outpost_intel():
                                    "from district warehouse inventories"})
 
 
+@app.post("/api/supply-route")
+def api_supply_route():
+    """Supply route for an outpost: nearest major facility (emergency-capable
+    or >=50 beds within 150 km, else nearest overall) with land + air options."""
+    d = request.get_json(silent=True) or {}
+    lat, lon = d.get("lat"), d.get("lon")
+    if lat is None or lon is None:
+        return jsonify({"error": "lat/lon required"}), 400
+    _, fac, _ = optimizer.load_data()
+    coords = fac[["lat", "lon"]].to_numpy()
+    dists = optimizer.pairwise_haversine_km(np.array([[float(lat), float(lon)]]), coords)[0]
+    order = np.argsort(dists)
+    pick = int(order[0])
+    for i in order[:100]:
+        row = fac.iloc[int(i)]
+        if (bool(row["has_emergency"]) or int(row["beds"]) >= 50) and dists[i] <= 150.0:
+            pick = int(i)
+            break
+    f = fac.iloc[pick]
+    dist = float(dists[pick])
+    return jsonify({
+        "source": {"name": str(f["Hospital_Name"])[:80],
+                   "lat": round(float(f["lat"]), 5), "lon": round(float(f["lon"]), 5),
+                   "beds": int(f["beds"]), "doctors": int(f["doctors"]),
+                   "emergency": bool(f["has_emergency"])},
+        "distance_km": round(dist, 1),
+        "land": {"speed_kmph": 40.0, "eta_min": round(dist / 40.0 * 60.0, 1)},
+        "air": {"speed_kmph": 120.0, "eta_min": round(dist / 120.0 * 60.0 + 5.0, 1)},
+    })
+
+
 # ------------------------------------------------------------- optimization
 @app.post("/api/optimize")
 def api_optimize():

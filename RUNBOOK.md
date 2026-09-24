@@ -119,7 +119,7 @@ Stop: `.\stop_demo.ps1`
 | ESP32 won't flash | Hold BOOT during connect; check native-USB socket; check USB CDC On Boot = Enabled |
 | Captive portal doesn't pop | Open `192.168.4.1` manually |
 | Tablet can't reach laptop `/hub` | Same Wi-Fi? Firewall allowed? Right IP? (`ipconfig`) |
-| ESP32 dead on stage | Console buttons: **🆘 Simulate Village SOS** + **📡 Simulate Hub Sync** — same story |
+| ESP32 dead on stage | Fallback: open **http://<laptop-ip>:5000/sos** on the phone (venue Wi-Fi) — a REAL phone → REAL server SOS; or the console's 🆘 Simulate Village SOS button |
 | Venue Wi-Fi dead | Dashboard runs standalone (local data); DHS tab falls back to local CSV |
 | Everything on fire | Recorded demo video (Phase C) |
 

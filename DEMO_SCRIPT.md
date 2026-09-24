@@ -22,7 +22,7 @@
 
 | Failure | Recovery line + action |
 |---|---|
-| ESP32 won't cooperate | "Let me show you the same flow through our simulation triggers." → console 🆘 Simulate Village SOS → 📡 Simulate Hub Sync |
+| ESP32 won't cooperate | "Let me show you the same flow through a real phone." → phone opens **http://<laptop-ip>:5000/sos** on venue Wi-Fi → taps Maternal → alert pops live on the console |
 | Venue Wi-Fi dead | Run everything on the laptop: console + dashboard are local; DHS tab falls back to the local CSV automatically |
 | Live API blocked | "The dashboard detects it and falls back to the downloaded DHS data — resilience is part of the design." |
 | Total disaster | Play the backup video (deck/demo_backup.mp4) |

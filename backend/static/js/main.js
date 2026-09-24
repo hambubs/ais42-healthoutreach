@@ -11,6 +11,7 @@ let villageLayer, facilityLayer, districtLayer, outpostLayer, sosLayer, dispatch
 let outposts = [], selectedMode = null, seenSos = new Set(), sosCount = 0, lastFeedSig = null;
 let districtBubbleLayer, lodTimer = null;
 let drawLayer = null, activeRegion = null;
+let supplyLayer, supplyData = null, supplyAir = false, lastOutpost = null;
 
 /* ------------------------------------------------------------------ init */
 function init() {
@@ -26,6 +27,7 @@ function init() {
   outpostLayer  = L.layerGroup().addTo(map);
   sosLayer      = L.layerGroup().addTo(map);
   dispatchLayer = L.layerGroup().addTo(map);
+  supplyLayer   = L.layerGroup().addTo(map);
   districtBubbleLayer = L.layerGroup().addTo(map);
 
   map.on("click", onMapClick);
@@ -53,7 +55,6 @@ function init() {
   bindControls();
   setInterval(pollSos, 5000);
   pollSos();
-  loadBaseline();
   scheduleLOD();
   window.addEventListener("online", updateMeshBadge);
   window.addEventListener("offline", updateMeshBadge);
@@ -73,15 +74,6 @@ async function api(path, opts) {
   return r.json();
 }
 const fmt = (n) => n.toLocaleString("en-IN");
-
-async function loadBaseline() {
-  try {
-    const b = await api("/api/baseline");
-    document.getElementById("kpi-coverage").textContent = b.coverage_pct_villages + "%";
-    document.getElementById("kpi-sched").textContent = b.coverage_pct_villages + "%";
-    document.getElementById("kpi-under").textContent = fmt(b.underserved_villages);
-  } catch (e) { /* keep hardcoded defaults */ }
-}
 
 /* --------------------------------------------------------------- villages */
 async function loadVillages() {
@@ -114,7 +106,8 @@ function drawVillages() {
         `Population: ${fmt(v.Population)}<br>` +
         `Travel to care: ${v.Average_Travel_Time_min} min (${v.Distance_to_Hospital_km ?? "—"} km)<br>` +
         `Road: ${v.Road_Connectivity} · Risk: ${v.Healthcare_Risk_Level}<br>` +
-        `Need score: ${v.need_score}${v.Underserved_Area_Flag_bin ? " · <b>UNDERSERVED</b>" : ""}`
+        `Need score: ${v.need_score}${v.Underserved_Area_Flag_bin ? " · <b>UNDERSERVED</b>" : ""}` +
+        `<button class="popup-btn" onclick="dispatchTo(${v.Latitude}, ${v.Longitude}, '${v.Road_Connectivity}', '${v.Healthcare_Risk_Level}')">🚑 Send emergency services</button>`
       );
       villageLayer.addLayer(c);
     });
@@ -131,7 +124,8 @@ async function loadFacilities() {
       });
       c.bindPopup(`<b>${f.Hospital_Name}</b><br>${f.District}, ${f.State}` +
         `${f.has_emergency ? "<br>⚡ Emergency services" : ""}` +
-        `${f.has_ambulance ? "<br>🚑 Ambulance" : ""}`);
+        `${f.has_ambulance ? "<br>🚑 Ambulance" : ""}` +
+        `<button class="popup-btn" onclick="dispatchTo(${f.lat}, ${f.lon})">🚑 Send emergency services</button>`);
       facilityLayer.addLayer(c);
     });
   } catch (e) { toast("Failed to load facilities: " + e.message); }
@@ -276,7 +270,17 @@ function showAreaStats(region, areaKm2) {
   const inV = villagesData.filter((v) => pointInRegion(v.Latitude, v.Longitude, region));
   const pop = inV.reduce((s, v) => s + v.Population, 0);
   const under = inV.filter((v) => v.Underserved_Area_Flag_bin).length;
-  const fac = facilitiesData.filter((f) => pointInRegion(f.lat, f.lon, region)).length;
+  const fac = facilitiesData.filter((f) => pointInRegion(f.lat, f.lon, region));
+  let clat, clon;
+  if (region.type === "circle") { clat = region.lat; clon = region.lon; }
+  else {
+    const ring = region.coordinates;
+    clat = ring.reduce((s, p) => s + p[1], 0) / ring.length;
+    clon = ring.reduce((s, p) => s + p[0], 0) / ring.length;
+  }
+  const near = facilitiesData
+    .map((f) => ({ f, d: haversineJS(clat, clon, f.lat, f.lon) }))
+    .sort((a, b) => a.d - b.d).slice(0, 3);
   const el = document.getElementById("area-stats");
   el.style.display = "block";
   el.innerHTML =
@@ -285,27 +289,39 @@ function showAreaStats(region, areaKm2) {
     `<div class="stat"><div class="v">${fmt(pop)}</div><div class="l">population</div></div>` +
     `<div class="stat"><div class="v">${fmt(inV.length)}</div><div class="l">villages</div></div>` +
     `<div class="stat"><div class="v">${fmt(under)}</div><div class="l">underserved</div></div>` +
-    `<div class="stat"><div class="v">${fmt(fac)}</div><div class="l">facilities</div></div>` +
+    `<div class="stat"><div class="v">${fmt(fac.length)}</div><div class="l">facilities</div></div>` +
+    `</div>` +
+    `<div class="meta" style="margin-top:6px">Nearby: ${near.map((n) => `${n.f.Hospital_Name} (${n.d.toFixed(0)} km)`).join(" · ")}</div>` +
+    `<div class="row" style="margin-top:6px;gap:10px;align-items:center">` +
+    `<span class="meta">MMUs</span><input type="number" id="region-fleet" value="3" min="1" max="8">` +
+    `<span class="meta">Target min</span><input type="number" id="region-minutes" value="30" min="15" max="60" step="5">` +
     `</div>` +
     `<button onclick="optimizeRegion()">⚡ Plan this area</button>` +
     `<button class="secondary" onclick="clearRegion()">✕ Clear</button>`;
 }
 
+function haversineJS(lat1, lon1, lat2, lon2) {
+  const R = 6371, toR = Math.PI / 180;
+  const dLat = (lat2 - lat1) * toR, dLon = (lon2 - lon1) * toR;
+  const h = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * toR) * Math.cos(lat2 * toR) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
 async function optimizeRegion() {
   if (!activeRegion) return;
   toast("Optimizing within the drawn region…");
+  const fleetEl = document.getElementById("region-fleet");
+  const minEl = document.getElementById("region-minutes");
+  const fleet = fleetEl ? +fleetEl.value : +document.getElementById("fleet").value;
+  const minutes = minEl ? +minEl.value : +document.getElementById("minutes").value;
   try {
     const r = await api("/api/optimize", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fleet_size: +document.getElementById("fleet").value,
-        max_minutes: +document.getElementById("minutes").value,
-        region: activeRegion }),
+      body: JSON.stringify({ fleet_size: fleet, max_minutes: minutes, region: activeRegion }),
     });
     outposts = r.outposts;
-    drawOutposts(r, +document.getElementById("minutes").value);
-    document.getElementById("kpi-coverage").textContent = r.after.coverage_pct_villages + "%";
-    document.getElementById("kpi-sched").textContent = r.scheduled_care.coverage_pct_villages + "%";
+    drawOutposts(r, minutes);
     toast(`✅ ${r.outposts.length} MMUs staged in region · scheduled care ${r.scheduled_care.coverage_pct_villages}%`);
   } catch (e) { toast("Region optimize failed: " + e.message); }
 }
@@ -317,6 +333,7 @@ function clearRegion() {
 }
 
 async function loadIntel(o) {
+  lastOutpost = o;
   try {
     const r = await api("/api/outpost-intel", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -324,7 +341,36 @@ async function loadIntel(o) {
     });
     renderIntel(o, r);
   } catch (e) { toast("Intel failed: " + e.message); }
+  try {
+    const s = await api("/api/supply-route", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lat: o.lat, lon: o.lon }),
+    });
+    supplyData = s; supplyAir = false;
+    renderSupplyRoute();
+  } catch (e) { console.error("supply route failed:", e); }
 }
+
+function renderSupplyRoute() {
+  supplyLayer.clearLayers();
+  const s = supplyData;
+  if (!s || !lastOutpost) return;
+  const opt = supplyAir ? s.air : s.land;
+  const color = supplyAir ? "#3b82f6" : "#f39c12";
+  L.polyline([[s.source.lat, s.source.lon], [lastOutpost.lat, lastOutpost.lon]],
+    { color, weight: 2.5, dashArray: supplyAir ? "8 6" : undefined })
+    .addTo(supplyLayer)
+    .bindPopup(`<b>${supplyAir ? "🛩 Air" : "🚚 Land"} resupply</b> · ${lastOutpost.outpost_id}<br>` +
+      `From: ${s.source.name}<br>` +
+      `${s.distance_km} km · ETA ${opt.eta_min} min @ ${opt.speed_kmph} km/h<br>` +
+      `<button class="popup-btn" onclick="toggleSupplyMode()">Switch to ${supplyAir ? "🚚 land" : "🛩 air"}</button>`);
+  L.circleMarker([s.source.lat, s.source.lon], {
+    radius: 5, color: "#f39c12", fillColor: "#f39c12", fillOpacity: 0.9,
+  }).addTo(supplyLayer)
+    .bindPopup(`<b>Supply source</b><br>${s.source.name}<br>${s.source.beds} beds · ${s.source.doctors} doctors`);
+}
+
+function toggleSupplyMode() { supplyAir = !supplyAir; renderSupplyRoute(); }
 
 function renderIntel(o, r) {
   const p = document.getElementById("intel-panel");
@@ -382,8 +428,6 @@ async function runOptimize() {
     });
     outposts = r.outposts;
     drawOutposts(r, minutes);
-    document.getElementById("kpi-coverage").textContent = r.after.coverage_pct_villages + "%";
-    document.getElementById("kpi-sched").textContent = r.scheduled_care.coverage_pct_villages + "%";
     toast(`✅ ${fleet} MMU outposts placed · scheduled care ${r.scheduled_care.coverage_pct_villages}% · ` +
           `${(r.scheduled_care.new_population / 1e6).toFixed(1)}M people newly served`);
   } catch (e) { toast("Optimize failed: " + e.message); }
@@ -465,13 +509,17 @@ function addSosMarker(a) {
   if (a.lat == null) return;
   L.marker([a.lat, a.lon], {
     icon: L.divIcon({ className: "sos-pin", html: '<span class="pulse"></span>🆘', iconSize: [26, 26], iconAnchor: [13, 13] }),
-  }).addTo(sosLayer);
+  }).addTo(sosLayer)
+   .bindPopup(`<b>🆘 ${a.sos_type.toUpperCase()}</b> · ${a.priority}<br>${a.node_id}` +
+     `${a.recommended_mode ? `<br>Suggested: ${a.recommended_mode}` : ""}` +
+     `<button class="popup-btn" onclick="dispatchTo(${a.lat}, ${a.lon})">🚑 Send emergency services</button>`);
 }
 
 /* ---------------------------------------------------------------- dispatch */
-async function dispatch(payload) {
-  if (!selectedMode) { toast("Select a dispatch mode first"); return; }
-  const body = { mode: selectedMode, ...payload };
+async function dispatch(payload, modeOverride) {
+  const mode = modeOverride || selectedMode;
+  if (!mode) { toast("Select a dispatch mode first"); return; }
+  const body = { ...payload, mode };
   try {
     const job = await api("/api/dispatch", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -529,6 +577,19 @@ function onMapClick(e) {
   dispatch({ lat: +e.latlng.lat.toFixed(4), lon: +e.latlng.lng.toFixed(4) });
 }
 
+/* ------------------------------------- one-tap emergency from any node */
+function autoMode(road, risk) {
+  if (road === "Poor" && risk === "High") return "uav";
+  if (road === "Poor") return "rider_2w";
+  return "ambulance";
+}
+
+async function dispatchTo(lat, lon, road, risk) {
+  const mode = selectedMode || autoMode(road || "Good", risk || "Low");
+  if (!selectedMode) toast(`No mode armed — auto-selecting ${mode}`);
+  dispatch({ lat: +lat, lon: +lon }, mode);
+}
+
 /* ------------------------------------------------------------ demo triggers */
 async function demoSos() {
   const pool = villagesData.filter((v) => v.Underserved_Area_Flag_bin);
@@ -548,23 +609,11 @@ async function demoSos() {
         (r.recommended_mode ? ` → recommend ${r.recommended_mode}` : ""));
   pollSos();
 }
-async function demoSync() {
-  const r = await api("/api/sync", {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ alerts: [
-      { node_id: "HUB-01", sos_type: "medicine", priority: "high", lat: 25.9, lon: 81.8 },
-      { node_id: "HUB-01", sos_type: "trauma", priority: "critical", lat: 24.6, lon: 78.4 },
-    ]}),
-  });
-  toast(`📡 Hub back online — ${r.synced} offline alerts synced`);
-  pollSos();
-}
 
 /* -------------------------------------------------------------- UI wiring */
 function bindControls() {
   document.getElementById("btn-optimize").onclick = runOptimize;
   document.getElementById("btn-demo-sos").onclick = demoSos;
-  document.getElementById("btn-demo-sync").onclick = demoSync;
   const sb = document.getElementById("search-box");
   if (sb) sb.addEventListener("keydown", (e) => { if (e.key === "Enter") doSearch(sb.value); });
   document.getElementById("fleet").oninput = (e) => (document.getElementById("fleet-val").textContent = e.target.value);

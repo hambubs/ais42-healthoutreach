@@ -92,3 +92,8 @@ button.secondary { background: var(--card); color: var(--text); border: 1px soli
 .stock-ok { color: #2ecc71; font-weight: 700; }
 .stock-low { color: var(--amber); font-weight: 700; }
 .stock-out { color: var(--red); font-weight: 700; }
+
+.popup-btn { background: var(--accent); color: #04241b; border: none; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 700; cursor: pointer; margin-top: 6px; width: 100%; }
+.popup-btn:hover { filter: brightness(1.1); }
+#area-stats input[type=number] { width: 52px; background: var(--card); color: var(--text); border: 1px solid var(--line); border-radius: 5px; padding: 4px 6px; font-size: 12px; }
+#area-stats .meta { font-size: 10px; color: var(--muted); }

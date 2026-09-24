@@ -78,7 +78,7 @@ it tries to connect, release when flashing starts.
 | Portal doesn't auto-open | Open `http://192.168.4.1` manually — Android captive detection is lazy sometimes |
 | "Connected, no internet" warning | Expected — that's why the portal exists |
 | LittleFS mount FAILED | Re-upload with matching Partition Scheme (must include SPIFFS/LittleFS) |
-| ESP32 acts weird on stage | Fallback: use the console's **🆘 Simulate Village SOS** + **📡 Simulate Hub Sync** demo buttons — same story, zero hardware |
+| ESP32 acts weird on stage | Fallback: open **http://<laptop-ip>:5000/sos** on the phone (venue Wi-Fi) — a REAL phone → REAL server SOS; or the console's 🆘 Simulate Village SOS button |
 
 ## 6. Hardware notes
 

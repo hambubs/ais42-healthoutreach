@@ -30,8 +30,8 @@
 - `backend/templates/index.html` + `static/js/main.js` + `static/css/style.css`
 - Dark-theme Leaflet command console: risk-colored villages, facilities,
   district borders, ★ outposts + 30-min rings, live SOS feed (5 s polling),
-  5 dispatch-mode cards (🚑 🚐 🏍️ 🚁 ⛺), UAV route drawing, demo triggers
-  (Simulate Village SOS / Simulate Hub Sync)
+  5 dispatch-mode cards (🚑 🚐 🏍️ 🚁 ⛺), UAV route drawing, demo trigger
+  (Simulate Village SOS — the hub-sync flow is the REAL ESP32 + phone + tablet rig)
 
 ### Phase 2b — Impact Dashboard (COMPLETE, health-checked)
 - `dashboard/app.py` — Streamlit + Folium + Plotly: KPI row, fleet slider,
