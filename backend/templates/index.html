@@ -41,12 +41,13 @@
     </div>
 
     <div class="section">
-      <h2>Optimize Outposts (DBSCAN → MCLP)</h2>
+      <h2>Plan This Area</h2>
+      <div class="hint" id="optimize-hint" style="color: var(--amber); font-weight: 700;">⚠️ Draw an area on the map first (use the rectangle, circle, or polygon tool)</div>
       <label>Fleet size: <b id="fleet-val">3</b> MMUs</label>
       <input type="range" id="fleet" min="1" max="8" value="3">
       <label>Max travel: <b id="minutes-val">30</b> min</label>
       <input type="range" id="minutes" min="15" max="60" value="30" step="5">
-      <button id="btn-optimize">⚡ Run Spatial Optimization</button>
+      <button id="btn-optimize" disabled style="opacity: 0.5; cursor: not-allowed;">⚡ Run Spatial Optimization</button>
     </div>
 
     <div class="section">

@@ -293,12 +293,7 @@ function showAreaStats(region, areaKm2) {
     `<div class="stat"><div class="v">${fmt(fac.length)}</div><div class="l">facilities</div></div>` +
     `</div>` +
     `<div class="meta" style="margin-top:6px">Nearby: ${near.map((n) => `${n.f.Hospital_Name} (${n.d.toFixed(0)} km)`).join(" · ")}</div>` +
-    `<div class="row" style="margin-top:6px;gap:10px;align-items:center">` +
-    `<span class="meta">MMUs</span><input type="number" id="region-fleet" value="3" min="1" max="8">` +
-    `<span class="meta">Target min</span><input type="number" id="region-minutes" value="30" min="15" max="60" step="5">` +
-    `</div>` +
-    `<button onclick="optimizeRegion()">⚡ Plan this area</button>` +
-    `<button class="secondary" onclick="clearRegion()">✕ Clear</button>`;
+    `<div class="meta" style="margin-top:4px">Adjust fleet size & travel time in the sidebar → click ⚡ Optimize</div>`;
 }
 
 function haversineJS(lat1, lon1, lat2, lon2) {
@@ -310,12 +305,10 @@ function haversineJS(lat1, lon1, lat2, lon2) {
 }
 
 async function optimizeRegion() {
-  if (!activeRegion) return;
+  if (!activeRegion) return toast("Draw an area first");
   toast("Optimizing within the drawn region…");
-  const fleetEl = document.getElementById("region-fleet");
-  const minEl = document.getElementById("region-minutes");
-  const fleet = fleetEl ? +fleetEl.value : +document.getElementById("fleet").value;
-  const minutes = minEl ? +minEl.value : +document.getElementById("minutes").value;
+  const fleet = +document.getElementById("fleet").value;
+  const minutes = +document.getElementById("minutes").value;
   try {
     const r = await api("/api/optimize", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -323,7 +316,7 @@ async function optimizeRegion() {
     });
     outposts = r.outposts;
     drawOutposts(r, minutes);
-    toast(`✅ ${r.outposts.length} MMUs staged in region · scheduled care ${r.scheduled_care.coverage_pct_villages}%`);
+    toast(`✅ ${r.outposts.length} MMUs staged in region · scheduled care ${r.scheduled_care.coverage_pct_villages}% · ${r.scheduled_care.new_population / 1e6 > 1 ? (r.scheduled_care.new_population / 1e6).toFixed(1) + "M" : fmt(r.scheduled_care.new_population)} people`);
   } catch (e) { toast("Region optimize failed: " + e.message); }
 }
 
@@ -331,6 +324,7 @@ function clearRegion() {
   if (drawLayer) { map.removeLayer(drawLayer); drawLayer = null; }
   activeRegion = null;
   document.getElementById("area-stats").style.display = "none";
+  enableOptimize(false);
 }
 
 async function loadIntel(o) {
@@ -635,7 +629,10 @@ async function submitSosForm() {
 
 /* -------------------------------------------------------------- UI wiring */
 function bindControls() {
-  document.getElementById("btn-optimize").onclick = runOptimize;
+  document.getElementById("btn-optimize").onclick = () => {
+    if (!activeRegion) { toast("⚠️ Draw an area on the map first"); return; }
+    optimizeRegion();
+  };
   document.getElementById("btn-sos").onclick = submitSosForm;
   populateVillageSelect();
   const sb = document.getElementById("search-box");
