@@ -15,7 +15,7 @@ to the nearest medical facility — only **13.82%** are within 30 minutes. Healt
 spatial-AI planner + offline SOS network that:
 
 1. **Plans** — clusters underserved villages (DBSCAN) and places Mobile Medical Units via a
-   greedy Maximal-Coverage optimizer, staging every unit at a **real, existing facility**
+   greedy Maximal-Coverage optimizer, placing every unit at the population-weighted center of its circuit
    from the government's 30,273-hospital directory. 3 MMUs take scheduled care from
    **13.82% → 22.84% of villages (14.75 million people)**; 8 MMUs → 36.68%.
 2. **Reaches** — when villages have no cellular at all, an ESP32-S3 node broadcasts an
@@ -72,7 +72,7 @@ back into provided-derived files. Full provenance: `DATA_SOURCES.md`.
                ▼
 ┌───────────────────── OPTIMIZER (backend/optimizer.py) ──────────────┐
 │ Need Score → underserved mask → DBSCAN (+K-Means guard, circuits    │
-│ capped ≤400 villages) → greedy MCLP → re-anchor to REAL facilities │
+│ capped ≤400 villages) → greedy MCLP → place at population-weighted centers │
 │ → dual coverage metrics · 7-mode dispatch rules · UAV handoff       │
 └──────────┬──────────────────────────────────┬───────────────────────┘
            │ in-memory pandas (one data spine) │
@@ -101,7 +101,7 @@ back into provided-derived files. Full provenance: `DATA_SOURCES.md`.
 | `scripts/fix_geo.py` | re-anchors synthetic coords into district polygons (originals preserved) | rewrites `villages_clean.csv` |
 | `backend/seed.py` | district alias joins (Kanpur→Kanpur Nagar/Dehat, Prayagraj→Allahabad), GeoJSON filter, DHS + HeiGIT extracts | writes `data/clean/enrichment/*` |
 | `scripts/fetch_worldpop.py` | WorldPop 1km window for the BLR pilot bbox (19M people) | writes `enrichment/worldpop/*` |
-| `backend/optimizer.py` | the AI core: Need Score, DBSCAN→MCLP, facility re-anchoring, region filter, dispatch rules, UAV handoff, district centroids | imported by app.py + dashboard |
+| `backend/optimizer.py` | the AI core: Need Score, DBSCAN→MCLP, population-weighted placement, region filter, dispatch rules, UAV handoff, district centroids | imported by app.py + dashboard |
 | `backend/models.py` | SQLite live state: SosAlert (with recommended_mode), DispatchJob, Outpost, MmuTrack | Flask-SQLAlchemy |
 | `backend/app.py` | 22 REST endpoints + serves the console + `/hub` + mobile `/sos` + startup column migration | the single backend |
 | `backend/static/js/main.js` | the console brain: zoom-LOD, Geoman draw tools + area stats, 7-mode dispatch, popups with one-tap emergency, supply routes, intel panel, mesh badge, search, SOS polling | talks only to the API above |

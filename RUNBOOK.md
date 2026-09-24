@@ -24,7 +24,7 @@ Team AIS-42 · PS-4B · Presentations 10 AM Sep 25, JC Road Campus
 Dark Leaflet command console: zoom-LOD (district bubbles → villages → facilities), draw tools + area planning, 7 dispatch-mode cards, dual coverage rings, live SOS feed (5s poll), supply routes, medical intel panel, search, **"📊 Impact Dashboard ↗" nav tab**.
 
 ### D. Impact Dashboard ✅ (`http://localhost:8501`)
-3 tabs: **🗺️ Impact & Analytics** (before/after, top-10 districts, DHS explorer, HeiGIT validation) · **🛰️ WorldPop BLR Pilot** (19M people heat layer) · **🇮🇳 DHS Live** (live API + fallback + STATcompiler launch button).
+3 tabs: **🗺️ Where are the clinics?** (before/after, top-10 districts, DHS explorer, HeiGIT validation) · **🛰️ Bengaluru pilot area** (19M people heat layer) · **🇮🇳 Health data (live)** (live API + fallback + STATcompiler launch button).
 
 ### E. Edge rig ✅ (code written — flash per `edge/HARDWARE_GUIDE.md`)
 `edge/esp32_gateway/esp32_gateway.ino` — AP "MMU-GATEWAY" + captive portal + one-tap SOS + AES-128-CBC (mbedTLS) + LittleFS queue. `edge/esp32_gateway/esp32_gateway_lora/esp32_gateway_lora.ino` — same + LoRa beacon (single-board S3 demo). `edge/hub_page/hub.html` — paste-and-sync page (also served at `/hub`).
@@ -35,7 +35,7 @@ Dark Leaflet command console: zoom-LOD (district bubbles → villages → facili
 - 30-min emergency coverage: 13.82% → 15.09% with 3 MMUs (bridged by dispatch modes)
 - UAV trigger: villages with Road=Poor AND Risk=High → air dispatch (rule engine)
 - HeiGIT validation: UP 24.9% / MP 16.0% within 30-min (independent WorldPop-based analysis)
-- DHS live: India child anemia 2019-21 = 68.1% (verified via API)
+- Health data (live): India child anemia 2019-21 = 68.1% (verified via API)
 
 ---
 
@@ -48,15 +48,15 @@ powershell -ExecutionPolicy Bypass -File .\start_demo.ps1
 ```
 Both browsers open. On the **Console** (:5000):
 1. Tick "Hospitals & facilities" layer → blue dots appear
-2. Click **⚡ Run Spatial Optimization** → ★ outposts + dual coverage rings appear and the toast shows scheduled care → ~22.8%
-3. Click **🆘 Simulate Village SOS** → toast + red pulse on map + feed entry
+2. Click **⚡ Find Optimal Clinic Locations** → ★ outposts + dual coverage rings appear and the toast shows scheduled care → ~22.8%
+3. Click **🆘 Submit SOS (sidebar form)** → toast + red pulse on map + feed entry
 4. Click the **🚁 UAV** card → click the SOS point → handoff card + blue flight line
 5. Click **"📊 Impact Dashboard ↗"** → dashboard opens in a new tab
 
 On the **Dashboard** (:8501):
-6. Sidebar → **🚀 Run Optimization** → before/after metrics + map updates
+6. Sidebar → **🚀 Find Optimal Locations** → before/after metrics + map updates
 7. **🛰️ WorldPop tab** → BLR heat layer renders
-8. **🇮🇳 DHS Live tab** → pick an indicator → live chart (or fallback caption if Wi-Fi blocks it)
+8. **🇮🇳 Health data (live) tab** → pick an indicator → live chart (or fallback caption if Wi-Fi blocks it)
 
 Stop: `.\stop_demo.ps1`
 
@@ -104,13 +104,13 @@ Stop: `.\stop_demo.ps1`
 | # | Who | Action | Audience sees |
 |---|---|---|---|
 | 1 | Presenter | Console: "12,000 villages, only 13.8% within 30 min of care" | district bubbles + borders |
-| 2 | Presenter | Run Optimization (fleet 3) | ★ outposts, coverage 13.8→22.8%, 14.75M served |
+| 2 | Presenter | Find Optimal Locations (fleet 3) | ★ outposts, coverage 13.8→22.8%, 14.75M served |
 | 3 | You | "This village has no cell coverage" — show Phone A in airplane mode | the phone |
 | 4 | Phone A | Join MMU-GATEWAY → portal → tap Maternal SOS | one-tap, zero installs |
 | 5 | Tablet | `/hub` → Pull → show the 🔒 ct_sig | encrypted-at-rest proof |
 | 6 | Tablet | Switch to Wi-Fi → paste into `http://<laptop-ip>:5000/hub` → Sync | alert pops on console |
 | 7 | Presenter | Select 🚁 UAV → click the SOS/cluster | TechEagle handoff card + flight line |
-| 8 | Presenter | Switch to Dashboard → WorldPop tab → DHS Live tab | BLR pilot density + live DHS API |
+| 8 | Presenter | Switch to Dashboard → WorldPop tab → Health data (live) tab | BLR pilot density + live DHS API |
 | 9 | All | Q&A | rubric-mapped numbers |
 
 ### STEP 7 · Fallbacks (know these cold)
@@ -119,7 +119,7 @@ Stop: `.\stop_demo.ps1`
 | ESP32 won't flash | Hold BOOT during connect; check native-USB socket; check USB CDC On Boot = Enabled |
 | Captive portal doesn't pop | Open `192.168.4.1` manually |
 | Tablet can't reach laptop `/hub` | Same Wi-Fi? Firewall allowed? Right IP? (`ipconfig`) |
-| ESP32 dead on stage | Fallback: open **http://<laptop-ip>:5000/sos** on the phone (venue Wi-Fi) — a REAL phone → REAL server SOS; or the console's 🆘 Simulate Village SOS button |
+| ESP32 dead on stage | Fallback: open **http://<laptop-ip>:5000/sos** on the phone (venue Wi-Fi) — a REAL phone → REAL server SOS; or the console's 🆘 Submit SOS (sidebar form) button |
 | Venue Wi-Fi dead | Dashboard runs standalone (local data); DHS tab falls back to local CSV |
 | Everything on fire | Recorded demo video (Phase C) |
 

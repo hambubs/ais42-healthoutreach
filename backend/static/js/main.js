@@ -383,7 +383,9 @@ function renderSupplyRoute() {
   L.circleMarker([s.source.lat, s.source.lon], {
     radius: 5, color: "#f39c12", fillColor: "#f39c12", fillOpacity: 0.9,
   }).addTo(supplyLayer)
-    .bindPopup(`<b>Supply source</b><br>${s.source.name}<br>${s.source.beds} beds · ${s.source.doctors} doctors`);
+    .bindPopup(`<b>Supply source</b><br>${s.source.name}<br>` +
+      (s.source.emergency ? "⚡ Emergency services<br>" : "") +
+      `${s.distance_km} km from MMU camp`);
 }
 
 function toggleSupplyMode() { supplyAir = !supplyAir; renderSupplyRoute(); }
@@ -493,7 +495,7 @@ function drawOutposts(r, minutes) {
       `<b>Serves ${fmt(o.circuit_villages)} villages</b> (${fmt(o.circuit_population)} people)<br>` +
       `📍 Avg distance to villages: <b>${o.avg_distance_km ?? "—"} km</b><br>` +
       `📍 Farthest village: <b>${o.max_distance_km ?? "—"} km</b><br>` +
-      `⏱️ Villages within 30-min reach: <b>${o.villages_within_30min ?? "—"}</b><br>` +
+      `📍 Villages within 25 km: <b>${o.villages_within_25km ?? o.villages_within_30min ?? "—"}</b><br>` +
       `🏥 Anchor district: ${o.anchor_district}<br>` +
       `📊 Health need score: ${o.circuit_mean_need}<hr>` +
       `<b style="font-size:11px">📦 Supply hub: ${o.supply_hub ?? "—"}</b><br>` +

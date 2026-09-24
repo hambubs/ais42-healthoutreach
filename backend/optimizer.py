@@ -312,7 +312,7 @@ def optimize(fleet_size: int = 3, max_minutes: int = 30,
             "anchor_district": str(district.iloc[0]) if len(district) else "",
             "avg_distance_km": round(float(d_vill.mean()), 1),
             "max_distance_km": round(float(d_vill.max()), 1),
-            "villages_within_30min": int((d_vill <= 25).sum()),
+            "villages_within_25km": int((d_vill <= 25).sum()),
             "circuit_village_ids": circuit["Village_ID"].tolist(),
         })
 

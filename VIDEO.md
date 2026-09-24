@@ -1,4 +1,4 @@
-# Backup Demo Video — recording checklist (mandatory per guidelines)
+﻿# Backup Demo Video — recording checklist (mandatory per guidelines)
 
 **Record TONIGHT after rehearsal. One take, 3–4 minutes, laptop screen + voice.**
 
@@ -8,10 +8,10 @@
 - Close all notifications (Focus Assist / Do Not Disturb)
 
 ## What to record (in one take)
-1. Console (:5000): layers on → ⚡ Run Optimization → coverage toast shows 22.8%
-2. 🆘 Simulate Village SOS → alert in feed
+1. Console (:5000): layers on → ⚡ Find Optimal Locations → coverage toast shows 22.8%
+2. 🆘 Submit SOS (sidebar form) → alert in feed
 3. 🚁 UAV card → click the SOS → handoff card + flight line
-4. Dashboard (:8501): Run Optimization → before/after → WorldPop tab → DHS Live tab
+4. Dashboard (:8501): Find Optimal Locations → before/after → WorldPop tab → Health data (live) tab
 5. Say the numbers OUT LOUD: "13.82% baseline… 22.84% with three units… 14.75 million people."
 
 ## Optional second clip (phone camera, 60s)

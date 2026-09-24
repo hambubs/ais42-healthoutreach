@@ -46,7 +46,7 @@ powershell -ExecutionPolicy Bypass -File .\start_demo.ps1
 ```
 prep_data.py → fix_geo.py → seed.py → fetch_worldpop.py
      ↓ (clean CSVs, one data spine)
-optimizer.py (Need Score → DBSCAN → MCLP → real-facility staging)
+optimizer.py (Need Score → DBSCAN → MCLP → population-weighted placement)
      ↓                          ↓
 app.py (Flask, 22 endpoints)   dashboard/app.py (Streamlit, 3 tabs)
      ↓

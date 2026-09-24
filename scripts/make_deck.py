@@ -218,7 +218,8 @@ content_slide(
         ("SDG 3.8 — Universal Health Coverage: care travels to the people, not people to care", {"bold": True}),
         ("SDG 10.2 — Reduced Inequalities: geography stops being a barrier to survival", {"bold": True}),
         ("Equity is hardcoded: the Need Score biases resources toward the least accessible", {}),
-        ("Every percentage point of coverage = millions of people", {"color": ACCENT}),
+        ("14.75M people newly served = ~2.1 billion person-minutes of travel saved per year", {"color": ACCENT}),
+        ("Operated by block health offices under existing NHM Mobile Medical Unit guidelines", {"color": MUTED}),
     ],
 )
 

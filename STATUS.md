@@ -31,7 +31,7 @@
 - Dark-theme Leaflet command console: zoom-LOD (district bubbles → villages →
   facilities), draw tools + region planning, 7 dispatch-mode cards
   (🚑 🚐 🏍️ 🚴 🛩️ 🚁 ⛺), dual coverage rings, live SOS feed, supply routes,
-  medical intel panel, search, demo trigger (Simulate Village SOS — the
+  medical intel panel, search, demo trigger (Submit SOS (sidebar form) — the
   hub-sync flow is the REAL ESP32 + phone + tablet rig)
 
 ### Phase 2b — Impact Dashboard (COMPLETE, health-checked)
@@ -55,8 +55,8 @@ powershell -ExecutionPolicy Bypass -File .\start_demo.ps1
 ```
 
 - **Ops Console** → http://localhost:5000 — toggle layers, hit
-  "⚡ Run Spatial Optimization", then "🆘 Simulate Village SOS", select the
+  "⚡ Find Optimal Clinic Locations", then "🆘 Submit SOS (sidebar form)", select the
   🚁 UAV card and click the SOS point on the map.
-- **Impact Dashboard** → http://localhost:8501 — sidebar → "🚀 Run Optimization".
+- **Impact Dashboard** → http://localhost:8501 — sidebar → "🚀 Find Optimal Locations".
 
 Stop with `.\stop_demo.ps1`.
