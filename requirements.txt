@@ -1,0 +1,15 @@
+flask
+flask-sqlalchemy
+flask-cors
+pandas
+scikit-learn
+numpy
+streamlit
+folium
+plotly
+requests
+rasterio
+python-pptx
+gunicorn
+python-dotenv
+streamlit-folium

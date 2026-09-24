@@ -1,0 +1,41 @@
+MIT License
+
+Copyright (c) 2026 Team AIS-42 — Sahil Thanveer Rai, Ashmita Roy, Subhalaxmi Sahoo, Punit Kumar
+JAIN (Deemed-to-be University) · AI for Sustainability Hackathon 2026
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+Third-Party Data Licenses
+=========================
+
+This project uses the following open datasets. Their respective licenses apply
+to those data files and do NOT restrict the code license above.
+
+| Dataset                                | Source             | License          | Location                              |
+|----------------------------------------|--------------------|------------------|---------------------------------------|
+| India ADM1/ADM2 Boundaries             | geoBoundaries      | ODC-ODbL         | backend/data/raw/india_adm*.geojson   |
+| DHS / NFHS-5 Subnational Indicators    | DHS via HDX        | CC BY-ND 4.0     | backend/data/raw/dhs_*.csv            |
+| HeiGIT Accessibility Indicators        | HeiGIT / WorldPop  | CC BY-SA 4.0     | backend/data/raw/heigit_*.csv         |
+| WorldPop 2020 Population Count (1 km)  | WorldPop / UN Adj  | CC BY 4.0        | backend/data/raw/ind_ppp_*.tif        |
+| Government Hospital Directory          | Provided Dataset   | Hackathon Terms  | backend/data/raw/hospital_directory.csv |
+| Rural Accessibility Dataset (12,000)   | Provided Dataset   | Hackathon Terms  | backend/data/raw/villages_12k.csv     |
+
+See DATA_SOURCES.md for full provenance, contamination controls, and attribution details.
