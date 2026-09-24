@@ -78,3 +78,17 @@ button.secondary { background: var(--card); color: var(--text); border: 1px soli
 #route-card .eta { font-size: 24px; font-weight: 800; color: var(--accent); }
 #route-card .eta.slow { color: var(--amber); }
 #route-card .meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+#area-stats { display: none; position: fixed; top: 66px; left: 50%; transform: translateX(-50%); z-index: 8000; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; box-shadow: 0 6px 24px rgba(0,0,0,.5); }
+#area-stats .row { display: flex; gap: 18px; }
+#area-stats .stat { text-align: center; }
+#area-stats .v { font-size: 16px; font-weight: 800; color: var(--accent); }
+#area-stats .l { font-size: 9px; color: var(--muted); text-transform: uppercase; }
+#area-stats button { margin-top: 8px; padding: 6px 10px; font-size: 11px; width: auto; display: inline-block; }
+#area-stats button.secondary { margin-left: 6px; }
+
+#intel-panel table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 6px; }
+#intel-panel td, #intel-panel th { border: 1px solid var(--line); padding: 4px 6px; text-align: left; }
+.stock-ok { color: #2ecc71; font-weight: 700; }
+.stock-low { color: var(--amber); font-weight: 700; }
+.stock-out { color: var(--red); font-weight: 700; }

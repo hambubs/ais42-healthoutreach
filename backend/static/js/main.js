@@ -10,6 +10,7 @@ let map, villagesData = [], facilitiesData = [], villagesById = new Map();
 let villageLayer, facilityLayer, districtLayer, outpostLayer, sosLayer, dispatchLayer, circuitLayer;
 let outposts = [], selectedMode = null, seenSos = new Set(), sosCount = 0, lastFeedSig = null;
 let districtBubbleLayer, lodTimer = null;
+let drawLayer = null, activeRegion = null;
 
 /* ------------------------------------------------------------------ init */
 function init() {
@@ -29,6 +30,20 @@ function init() {
 
   map.on("click", onMapClick);
   map.on("zoomend moveend", scheduleLOD);
+
+  if (map.pm) {
+    map.pm.addControls({
+      position: "topleft",
+      drawMarker: false, drawCircleMarker: false, drawPolyline: false, drawText: false,
+      editMode: false, dragMode: false, cutPolygon: false, rotateMode: false,
+      drawRectangle: true, drawPolygon: true, drawCircle: true, removalMode: true,
+    });
+    map.pm.setGlobalOptions({ allowSelfIntersection: false,
+                              templineStyle: { color: "#22d3a7" },
+                              hintlineStyle: { color: "#22d3a7", dashArray: "5 5" } });
+    map.on("pm:create", onShapeCreated);
+    map.on("pm:remove", onShapeRemoved);
+  }
 
   loadVillages();
   loadFacilities();
@@ -203,6 +218,136 @@ function doSearch(q) {
   toast("No match found");
 }
 
+/* ------------------------------------------------ area selection + intel */
+function onShapeRemoved() {
+  drawLayer = null; activeRegion = null;
+  document.getElementById("area-stats").style.display = "none";
+}
+
+function onShapeCreated(e) {
+  if (drawLayer) map.removeLayer(drawLayer);
+  drawLayer = e.layer;
+  drawLayer.addTo(map);
+  const gj = drawLayer.toGeoJSON();
+  let region, areaKm2;
+  if (e.shape === "Circle") {
+    const c = drawLayer.getLatLng();
+    const rKm = drawLayer.getRadius() / 1000;
+    region = { type: "circle", lat: c.lat, lon: c.lng, radius_km: rKm };
+    areaKm2 = Math.PI * rKm * rKm;
+  } else {
+    const coords = gj.geometry.coordinates[0].map((p) => [p[0], p[1]]);
+    region = { type: "polygon", coordinates: coords };
+    areaKm2 = polygonAreaKm2(coords);
+  }
+  activeRegion = region;
+  showAreaStats(region, areaKm2);
+}
+
+function polygonAreaKm2(coords) {
+  const latMean = coords.reduce((s, p) => s + p[1], 0) / coords.length;
+  const kx = 111.32 * Math.cos(latMean * Math.PI / 180), ky = 110.57;
+  let a = 0;
+  for (let i = 0; i < coords.length - 1; i++) {
+    a += (coords[i][0] * kx) * (coords[i + 1][1] * ky) -
+         (coords[i + 1][0] * kx) * (coords[i][1] * ky);
+  }
+  return Math.abs(a / 2);
+}
+
+function pointInRegion(lat, lon, region) {
+  if (region.type === "circle") {
+    const R = 6371, toR = Math.PI / 180;
+    const dLat = (lat - region.lat) * toR, dLon = (lon - region.lon) * toR;
+    const h = Math.sin(dLat / 2) ** 2 +
+      Math.cos(region.lat * toR) * Math.cos(lat * toR) * Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(h)) <= region.radius_km;
+  }
+  const ring = region.coordinates;
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+    if ((yi > lat) !== (yj > lat) && lon < (xj - xi) * (lat - yi) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+function showAreaStats(region, areaKm2) {
+  const inV = villagesData.filter((v) => pointInRegion(v.Latitude, v.Longitude, region));
+  const pop = inV.reduce((s, v) => s + v.Population, 0);
+  const under = inV.filter((v) => v.Underserved_Area_Flag_bin).length;
+  const fac = facilitiesData.filter((f) => pointInRegion(f.lat, f.lon, region)).length;
+  const el = document.getElementById("area-stats");
+  el.style.display = "block";
+  el.innerHTML =
+    `<div class="row">` +
+    `<div class="stat"><div class="v">${fmt(Math.round(areaKm2))}</div><div class="l">km²</div></div>` +
+    `<div class="stat"><div class="v">${fmt(pop)}</div><div class="l">population</div></div>` +
+    `<div class="stat"><div class="v">${fmt(inV.length)}</div><div class="l">villages</div></div>` +
+    `<div class="stat"><div class="v">${fmt(under)}</div><div class="l">underserved</div></div>` +
+    `<div class="stat"><div class="v">${fmt(fac)}</div><div class="l">facilities</div></div>` +
+    `</div>` +
+    `<button onclick="optimizeRegion()">⚡ Plan this area</button>` +
+    `<button class="secondary" onclick="clearRegion()">✕ Clear</button>`;
+}
+
+async function optimizeRegion() {
+  if (!activeRegion) return;
+  toast("Optimizing within the drawn region…");
+  try {
+    const r = await api("/api/optimize", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fleet_size: +document.getElementById("fleet").value,
+        max_minutes: +document.getElementById("minutes").value,
+        region: activeRegion }),
+    });
+    outposts = r.outposts;
+    drawOutposts(r, +document.getElementById("minutes").value);
+    document.getElementById("kpi-coverage").textContent = r.after.coverage_pct_villages + "%";
+    document.getElementById("kpi-sched").textContent = r.scheduled_care.coverage_pct_villages + "%";
+    toast(`✅ ${r.outposts.length} MMUs staged in region · scheduled care ${r.scheduled_care.coverage_pct_villages}%`);
+  } catch (e) { toast("Region optimize failed: " + e.message); }
+}
+
+function clearRegion() {
+  if (drawLayer) { map.removeLayer(drawLayer); drawLayer = null; }
+  activeRegion = null;
+  document.getElementById("area-stats").style.display = "none";
+}
+
+async function loadIntel(o) {
+  try {
+    const r = await api("/api/outpost-intel", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ district: o.anchor_district, outpost_id: o.outpost_id }),
+    });
+    renderIntel(o, r);
+  } catch (e) { toast("Intel failed: " + e.message); }
+}
+
+function renderIntel(o, r) {
+  const p = document.getElementById("intel-panel");
+  if (!p) return;
+  let html = `<div class="meta">${o.outpost_id} · ${r.district}, ${r.state}</div>`;
+  if (r.diseases && r.diseases.length) {
+    html += `<div style="margin-top:6px"><b>🦠 Endemic indicators (${r.survey})</b></div>`;
+    r.diseases.forEach((d) => { html += `<div class="meta">• ${d.indicator}: <b>${d.value}%</b></div>`; });
+  }
+  html += `<div style="margin-top:8px"><b>💊 Medicine stock</b> <span class="meta">(simulated)</span></div>` +
+          `<table><tr><th>Medicine</th><th>Status</th></tr>`;
+  r.stock.forEach((s) => {
+    const cls = s.status === "Available" ? "stock-ok" : s.status === "Low" ? "stock-low" : "stock-out";
+    html += `<tr><td>${s.medicine}</td><td class="${cls}">${s.status}</td></tr>`;
+  });
+  html += `</table>`;
+  if (r.sourcing && r.sourcing.length) {
+    html += `<div style="margin-top:6px"><b>🚚 Cheap sourcing</b></div>`;
+    r.sourcing.forEach((s) => { html += `<div class="meta">• ${s.medicine} → ${s.from} (${s.note})</div>`; });
+  }
+  p.innerHTML = html;
+}
+
 /* ------------------------------------------------------------------ modes */
 async function loadModes() {
   const modes = await api("/api/modes");
@@ -266,7 +411,11 @@ function drawOutposts(r, minutes) {
       `Mean need: ${o.circuit_mean_need}<br>` +
       `30-min emergency reach: +${o.emergency_new_villages} villages`
     );
-    mk.on("click", (e) => { L.DomEvent.stopPropagation(e); if (selectedMode) dispatch({ outpost_id: o.outpost_id, lat: o.lat, lon: o.lon }); });
+    mk.on("click", (e) => {
+      L.DomEvent.stopPropagation(e);
+      if (selectedMode) dispatch({ outpost_id: o.outpost_id, lat: o.lat, lon: o.lon });
+      else loadIntel(o);
+    });
     mk.addTo(outpostLayer);
     o.circuit_village_ids.forEach((vid) => {
       const v = villagesById.get(vid);

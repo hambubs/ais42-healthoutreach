@@ -187,6 +187,71 @@ def api_modes():
     return jsonify(optimizer.DISPATCH_MODES)
 
 
+# ------------------------------------------------- medical intelligence
+ESSENTIAL_MEDS = ["Anti-venom", "Insulin", "Oxytocin", "ORS", "Amoxicillin",
+                  "Paracetamol", "Anti-malarial", "Rabies vaccine"]
+
+
+@app.post("/api/outpost-intel")
+def api_outpost_intel():
+    """Disease indicators (real DHS/NFHS state data) + simulated medicine
+    stock matrix + cheap-sourcing suggestions for stockouts."""
+    import zlib
+
+    d = request.get_json(silent=True) or {}
+    district = str(d.get("district") or "")
+    if not district:
+        return jsonify({"error": "district required"}), 400
+    _, _, ds = optimizer.load_data()
+    row = ds[ds["District"] == district]
+    state = str(row.iloc[0]["State"]) if not row.empty else ""
+
+    def med_status(dist, med):
+        h = zlib.crc32(f"{dist}|{med}".encode()) % 10
+        return "Stockout" if h <= 2 else ("Low" if h <= 4 else "Available")
+
+    stock = [{"medicine": m, "status": med_status(district, m)} for m in ESSENTIAL_MEDS]
+    stockouts = [s["medicine"] for s in stock if s["status"] == "Stockout"]
+
+    sourcing = []
+    if state:
+        cents = optimizer.district_centroids()
+        home = cents.get((state, district))
+        peers = ds[ds["State"] == state]
+        for med in stockouts:
+            best, bestd = None, None
+            for _, pr in peers.iterrows():
+                if pr["District"] == district:
+                    continue
+                if med_status(pr["District"], med) != "Available":
+                    continue
+                c = cents.get((state, pr["District"]))
+                if not c or not home:
+                    continue
+                dist = optimizer.haversine_km(home[0], home[1], c[0], c[1])
+                if bestd is None or dist < bestd:
+                    best, bestd = pr["District"], dist
+            if best:
+                sourcing.append({"medicine": med, "from": best,
+                                 "note": f"{bestd:.0f} km · district warehouse rate"})
+
+    diseases, survey = [], "NFHS"
+    dhs_path = CLEAN / "enrichment" / "dhs_state_indicators.csv"
+    if dhs_path.exists() and state:
+        import pandas as pd
+        dhs = pd.read_csv(dhs_path)
+        dd = dhs[(dhs["state"] == state) & (dhs["value"] <= 100)]
+        dd = dd.sort_values("value", ascending=False).head(4)
+        for _, r in dd.iterrows():
+            diseases.append({"indicator": str(r["indicator"]), "value": float(r["value"])})
+            survey = str(r["survey"])
+
+    return jsonify({"district": district, "state": state, "stock": stock,
+                    "sourcing": sourcing, "diseases": diseases, "survey": survey,
+                    "stock_note": "simulated demo data — real deployment would sync "
+                                   "from district warehouse inventories"})
+
+
 # ------------------------------------------------------------- optimization
 @app.post("/api/optimize")
 def api_optimize():
@@ -197,6 +262,7 @@ def api_optimize():
             max_minutes=int(data.get("max_minutes", 30)),
             eps_km=float(data.get("eps_km", 25.0)),
             min_samples=int(data.get("min_samples", 10)),
+            region=data.get("region"),
         )
     except Exception as exc:  # noqa: BLE001
         return jsonify({"error": str(exc)}), 400

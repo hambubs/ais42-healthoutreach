@@ -85,6 +85,39 @@ def underserved_mask(v: pd.DataFrame, max_minutes: int = 30) -> pd.Series:
     return (v["Underserved_Area_Flag_bin"] == 1) | (v["Average_Travel_Time_min"] > max_minutes)
 
 
+def _point_in_ring(lon: float, lat: float, ring) -> bool:
+    """Even-odd ray casting. ring = [[lon, lat], ...]"""
+    inside = False
+    j = len(ring) - 1
+    for i in range(len(ring)):
+        xi, yi = ring[i][0], ring[i][1]
+        xj, yj = ring[j][0], ring[j][1]
+        if (yi > lat) != (yj > lat) and lon < (xj - xi) * (lat - yi) / (yj - yi) + xi:
+            inside = not inside
+        j = i
+    return inside
+
+
+def filter_region(v: pd.DataFrame, region: dict | None) -> pd.DataFrame:
+    """Filter villages to a user-drawn region.
+    circle  -> {"type": "circle", "lat": .., "lon": .., "radius_km": ..}
+    polygon -> {"type": "polygon", "coordinates": [[lon, lat], ...]}
+    """
+    if not region:
+        return v
+    if region.get("type") == "circle":
+        d = pairwise_haversine_km(
+            np.array([[region["lat"], region["lon"]]]),
+            v[["Latitude", "Longitude"]].to_numpy())[0]
+        return v[d <= float(region["radius_km"])]
+    if region.get("type") == "polygon":
+        ring = region.get("coordinates") or []
+        mask = np.array([_point_in_ring(lon, lat, ring)
+                         for lon, lat in zip(v["Longitude"], v["Latitude"])], dtype=bool)
+        return v[mask]
+    return v
+
+
 def dbscan_candidates(v: pd.DataFrame, eps_km: float = 25.0, min_samples: int = 10,
                       min_candidates: int = 8, max_circuit: int = 400):
     """Cluster underserved villages; centroids become candidate MMU sites.
@@ -175,9 +208,14 @@ def greedy_mclp(cands: pd.DataFrame, v: pd.DataFrame, travel: np.ndarray,
 
 
 def optimize(fleet_size: int = 3, max_minutes: int = 30,
-             eps_km: float = 25.0, min_samples: int = 10) -> dict:
-    """Full pipeline run -> dict ready for the API/dashboard."""
+             eps_km: float = 25.0, min_samples: int = 10, region: dict | None = None) -> dict:
+    """Full pipeline run -> dict ready for the API/dashboard.
+    `region` restricts planning to a user-drawn circle/polygon."""
     v, fac, ds = load_data()
+    if region:
+        v = filter_region(v, region)
+        if len(v) < 30:
+            raise RuntimeError(f"region contains only {len(v)} villages — draw a larger area")
     cands, noise, method, labeled = dbscan_candidates(v, eps_km, min_samples)
     if cands.empty:
         raise RuntimeError("clustering produced no candidates")

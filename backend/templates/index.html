@@ -6,6 +6,7 @@
 <title>AIS-42 HealthOutreach — Command Console</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.14.0/dist/leaflet-geoman.css"/>
 </head>
 <body>
 <header>
@@ -74,16 +75,19 @@
   </aside>
 
   <div id="map"></div>
+  <div id="area-stats"></div>
 
   <aside id="rightbar">
     <div class="section"><h2>Live SOS Feed</h2><div id="sos-feed"><div class="hint">Waiting for alerts…</div></div></div>
     <div class="section"><h2>Dispatch Log</h2><div id="dispatch-log"><div class="hint">No dispatches yet.</div></div></div>
+    <div class="section"><h2>🧪 Medical Intelligence</h2><div id="intel-panel"><div class="hint">Click an outpost ★ to load endemic indicators + medicine stock.</div></div></div>
   </aside>
 </main>
 <div id="route-card"></div>
 <div class="toast" id="toast"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.14.0/dist/leaflet-geoman.min.js"></script>
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
