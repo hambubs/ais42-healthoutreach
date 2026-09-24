@@ -3,10 +3,7 @@
 **PS-4B: Rural Healthcare Reachability & Outpost Planning** — AI for Sustainability Hackathon 2026
 Team AIS-42 · Track 4: Sustainable Healthcare · SDG 3 & 10
 
-Spatial-AI placement of Mobile Medical Units for rural India — staged at **real
-facilities**, planned for **maximum area coverage** — with a zero-connectivity
-ESP32-S3 SOS node (Wi-Fi captive portal + LoRa beacon) and a 7-mode dispatch engine
-(ambulance · MMU van · 2W rider · bike · UAV handoff · helicopter · outpost).
+Spatial-AI placement of Mobile Medical Units for rural India — placed at **population-weighted centers** of underserved villages (where the need actually is), with the nearest real facility as supply hub — plus a zero-connectivity ESP32-S3 SOS node (Wi-Fi captive portal + LoRa beacon) and a 7-mode dispatch engine (ambulance · MMU van · 2W rider · bike · UAV handoff · helicopter · outpost).
 
 ## Quickstart
 

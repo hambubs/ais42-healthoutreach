@@ -202,7 +202,7 @@ content_slide(
     "Multi-Modal Dispatch",
     "Rule engine: right vehicle, right terrain, right time",
     [
-        ("🚑 Ambulance (60 km/h) · 🚐 MMU Van (40) · 🏍️ 2W Rider (30) · 🚁 UAV (120) · ⛺ Mobile Outpost", {}),
+        ("🚑 Ambulance (60 km/h) · 🚐 MMU Van (40) · 🏍️ 2W Rider (30) · 🚴 Bike Medic (35) · 🛩️ UAV (120) · 🚁 Helicopter (200) · ⛺ Outpost", {}),
         ("Road = Poor AND Risk = High → automatic air-dispatch suggestion", {"bold": True, "color": ACCENT}),
         ("UAV handoff: TechEagle-class Vertiplane X3 — 3-5 kg payload, 100 km range, DGCA DigitalSky NPNT compliant", {}),
         ("Route line turns green when ETA ≤ 30 minutes, orange beyond", {}),

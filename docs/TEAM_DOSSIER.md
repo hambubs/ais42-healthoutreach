@@ -132,9 +132,7 @@ nearest-facility pickup, UAV handoff JSON) · `POST /api/supply-route` (land + a
 3. **DBSCAN clustering** — finds real settlement pockets (K-Means guard for uniform data;
    mega-clusters split into ≤400-village circuits, matching NHM block-scale practice).
 4. **Greedy MCLP** — selects outposts maximizing need-weighted population under scheduled care.
-5. **Re-anchoring** — every outpost is staged at the nearest REAL facility (≤50 km), with
-   beds/doctors/emergency status; fallback = highest-need village. Emergency coverage is
-   recomputed from the final real positions.
+5. **Placement** — every outpost is placed at the population-weighted centroid of its circuit (where the need actually is). The nearest real facility is recorded as the supply hub for medicines and emergency backup.
 6. **Dual metrics** — strict 30-min emergency coverage (13.82→15.09% with 3 MMUs) +
    scheduled circuit care (13.82→22.84%) — the gap is bridged by the dispatch engine.
 7. **Dispatch rules** — trauma/maternal on poor+high-risk terrain → helicopter airlift;
