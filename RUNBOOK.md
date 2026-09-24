@@ -17,17 +17,17 @@ Team AIS-42 · PS-4B · Presentations 10 AM Sep 25, JC Road Campus
 | **ENRICHMENT (separated)** | `backend/data/clean/enrichment/` | DHS, HeiGIT, district borders, WorldPop |
 | Provenance manifest | `DATA_SOURCES.md` | PROVIDED vs ENRICHMENT + licenses |
 
-### B. Backend ✅ (17/17 endpoints smoke-tested)
-`backend/app.py` — Flask + SQLite. Key endpoints: `/api/optimize` (DBSCAN→MCLP), `/api/sos-alert` (with auto mode recommendation), `/api/sync` (offline hub flush), `/api/dispatch` (5 modes + UAV handoff), `/api/villages`, `/api/facilities`, `/api/dhs`, `/api/heigit`, `/api/geojson/districts`, `/hub`, `/sos`.
+### B. Backend ✅ (22/22 endpoints smoke-tested)
+`backend/app.py` — Flask + SQLite. Key endpoints: `/api/optimize` (DBSCAN→MCLP, region-scoped), `/api/sos-alert` (auto mode recommendation), `/api/sync` (offline hub flush), `/api/dispatch` (7 modes + UAV handoff), `/api/supply-route`, `/api/outpost-intel`, `/api/villages` (bbox), `/api/districts` (centroids), `/api/dhs`, `/api/heigit`, `/api/geojson/districts`, `/hub`, `/sos`.
 
 ### C. Ops Console ✅ (`http://localhost:5000`)
-Dark Leaflet command console: risk-colored villages, facilities, district borders, ★ outposts + 30-min rings, live SOS feed (5s poll), 5 dispatch-mode cards, UAV flight-line drawing, demo triggers, **"📊 Impact Dashboard ↗" nav tab**.
+Dark Leaflet command console: zoom-LOD (district bubbles → villages → facilities), draw tools + area planning, 7 dispatch-mode cards, dual coverage rings, live SOS feed (5s poll), supply routes, medical intel panel, search, **"📊 Impact Dashboard ↗" nav tab**.
 
 ### D. Impact Dashboard ✅ (`http://localhost:8501`)
-3 tabs: **🗺️ Impact & Analytics** (before/after, top-10 districts, DHS explorer, HeiGIT validation) · **🛰️ WorldPop Density — BLR Pilot** (19M people heat layer) · **🇮🇳 DHS Live & STATcompiler** (live API + fallback + launch button).
+3 tabs: **🗺️ Impact & Analytics** (before/after, top-10 districts, DHS explorer, HeiGIT validation) · **🛰️ WorldPop BLR Pilot** (19M people heat layer) · **🇮🇳 DHS Live** (live API + fallback + STATcompiler launch button).
 
-### E. Edge rig ✅ (code written — NOT yet flashed)
-`edge/esp32_gateway/esp32_gateway.ino` — AP "MMU-GATEWAY" + captive portal + one-tap SOS + AES-128-CBC (mbedTLS) + LittleFS queue. `edge/hub_page/hub.html` — paste-and-sync page (also served at `/hub`). `edge/FLASH-CHECKLIST.md` — full flashing guide.
+### E. Edge rig ✅ (code written — flash per `edge/HARDWARE_GUIDE.md`)
+`edge/esp32_gateway/esp32_gateway.ino` — AP "MMU-GATEWAY" + captive portal + one-tap SOS + AES-128-CBC (mbedTLS) + LittleFS queue. `edge/esp32_gateway/esp32_gateway_lora/esp32_gateway_lora.ino` — same + LoRa beacon (single-board S3 demo). `edge/hub_page/hub.html` — paste-and-sync page (also served at `/hub`).
 
 ### F. Verified numbers (for the deck) — FINAL, everyone quotes these
 - Baseline: 13.82% villages within 30-min · 2,611 underserved · 107-min avg travel

@@ -73,13 +73,13 @@ button.secondary { background: var(--card); color: var(--text); border: 1px soli
 #search-box:focus { outline: 1px solid var(--accent); }
 .kpi .hint { font-size: 9px; color: var(--muted); }
 
-#route-card { display: none; position: fixed; bottom: 16px; left: 292px; background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; padding: 12px 16px; z-index: 9000; max-width: 360px; box-shadow: 0 6px 24px rgba(0,0,0,.5); }
+#route-card { display: none; position: fixed; bottom: 76px; left: 292px; background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; padding: 12px 16px; z-index: 9000; max-width: 360px; box-shadow: 0 6px 24px rgba(0,0,0,.5); }
 #route-card h3 { font-size: 13px; margin-bottom: 4px; color: var(--text); }
 #route-card .eta { font-size: 24px; font-weight: 800; color: var(--accent); }
 #route-card .eta.slow { color: var(--amber); }
 #route-card .meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-#area-stats { display: none; position: fixed; top: 66px; left: 50%; transform: translateX(-50%); z-index: 8000; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; box-shadow: 0 6px 24px rgba(0,0,0,.5); }
+#area-stats { display: none; position: fixed; top: 90px; left: calc(272px + (100% - 572px) / 2); z-index: 8000; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; box-shadow: 0 6px 24px rgba(0,0,0,.5); }
 #area-stats .row { display: flex; gap: 18px; }
 #area-stats .stat { text-align: center; }
 #area-stats .v { font-size: 16px; font-weight: 800; color: var(--accent); }
@@ -92,6 +92,9 @@ button.secondary { background: var(--card); color: var(--text); border: 1px soli
 .stock-ok { color: #2ecc71; font-weight: 700; }
 .stock-low { color: var(--amber); font-weight: 700; }
 .stock-out { color: var(--red); font-weight: 700; }
+
+.meta { font-size: 10px; color: var(--muted); }
+.mode-card:last-child { grid-column: span 2; }
 
 .popup-btn { background: var(--accent); color: #04241b; border: none; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 700; cursor: pointer; margin-top: 6px; width: 100%; }
 .popup-btn:hover { filter: brightness(1.1); }

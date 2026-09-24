@@ -8,7 +8,7 @@
 - Close all notifications (Focus Assist / Do Not Disturb)
 
 ## What to record (in one take)
-1. Console (:5000): layers on → ⚡ Run Optimization → KPI chips jump
+1. Console (:5000): layers on → ⚡ Run Optimization → coverage toast shows 22.8%
 2. 🆘 Simulate Village SOS → alert in feed
 3. 🚁 UAV card → click the SOS → handoff card + flight line
 4. Dashboard (:8501): Run Optimization → before/after → WorldPop tab → DHS Live tab

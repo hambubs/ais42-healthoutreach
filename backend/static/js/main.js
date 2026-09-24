@@ -155,9 +155,10 @@ async function loadDistrictBubbles() {
       const need = d.mean_need ?? 0;
       const col = need < 0.40 ? "#2ecc71" : need < 0.45 ? "#f39c12" : "#e74c3c";
       const c = L.circleMarker([d.lat, d.lon], {
-        radius: Math.min(34, 10 + Math.sqrt(d.underserved || 0) * 1.2),
+        radius: Math.min(16, 6 + Math.sqrt(d.underserved || 0) * 0.8),
         color: col, weight: 1, fillColor: col, fillOpacity: 0.55,
       });
+      c.bindTooltip(`${d.District}`, { sticky: true });
       c.bindPopup(
         `<b>${d.District}, ${d.State}</b><br>` +
         `${fmt(d.villages)} villages · ${fmt(d.population)} people<br>` +

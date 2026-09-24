@@ -14,7 +14,7 @@
 - **Baseline computed: only 13.82% of villages are within 30 min of care.
   Avg travel = 107 min. 2,611 underserved villages. 4,030 poor-road. 3,118 high-risk.**
 
-### Phase 1 — Backend (COMPLETE, 17/17 endpoints smoke-tested)
+### Phase 1 — Backend (22/22 endpoints smoke-tested)
 - `backend/app.py` — Flask API + SQLite: `/api/optimize`, `/api/sos-alert`,
   `/api/sync`, `/api/dispatch`, `/api/track`, `/api/villages`, `/api/facilities`,
   `/api/districts`, `/api/dhs`, `/api/heigit`, `/api/geojson/districts`, `/api/modes`…
@@ -28,10 +28,11 @@
 
 ### Phase 2 — Ops Console (COMPLETE, live-tested)
 - `backend/templates/index.html` + `static/js/main.js` + `static/css/style.css`
-- Dark-theme Leaflet command console: risk-colored villages, facilities,
-  district borders, ★ outposts + 30-min rings, live SOS feed (5 s polling),
-  5 dispatch-mode cards (🚑 🚐 🏍️ 🚁 ⛺), UAV route drawing, demo trigger
-  (Simulate Village SOS — the hub-sync flow is the REAL ESP32 + phone + tablet rig)
+- Dark-theme Leaflet command console: zoom-LOD (district bubbles → villages →
+  facilities), draw tools + region planning, 7 dispatch-mode cards
+  (🚑 🚐 🏍️ 🚴 🛩️ 🚁 ⛺), dual coverage rings, live SOS feed, supply routes,
+  medical intel panel, search, demo trigger (Simulate Village SOS — the
+  hub-sync flow is the REAL ESP32 + phone + tablet rig)
 
 ### Phase 2b — Impact Dashboard (COMPLETE, health-checked)
 - `dashboard/app.py` — Streamlit + Folium + Plotly: KPI row, fleet slider,
@@ -40,7 +41,7 @@
 
 ## ⏳ REMAINING
 
-- **Flash the ESP32-S3** and run the phone → tablet → laptop flow once (see `edge/HARDWARE_GUIDE.md` + `edge/FLASH-CHECKLIST.md`)
+- **Flash the ESP32-S3** and run the phone → tablet → laptop flow once (see `edge/HARDWARE_GUIDE.md`)
 - **Record the backup demo video** (see `VIDEO.md`)
 - **Rehearse the demo script twice** (see `DEMO_SCRIPT.md`)
 - **Backups to USB + Google Drive** (repo zip + video + deck)
