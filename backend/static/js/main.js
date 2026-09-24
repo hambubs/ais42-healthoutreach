@@ -449,24 +449,47 @@ function drawOutposts(r, minutes) {
   outpostLayer.clearLayers();
   circuitLayer.clearLayers();
   r.outposts.forEach((o) => {
-    L.circle([o.lat, o.lon], {           // Zone 1: 30-min primary (green)
-      radius: minutes * 666.7, color: "#22d3a7", weight: 1.4,
-      fillColor: "#22d3a7", fillOpacity: 0.12, dashArray: "6 6",
-    }).addTo(outpostLayer);
-    L.circle([o.lat, o.lon], {           // Zone 2: 60-min secondary (amber)
-      radius: minutes * 1333.4, color: "#f39c12", weight: 1,
-      fillColor: "#f39c12", fillOpacity: 0.05, dashArray: "3 7",
-    }).addTo(outpostLayer);
-    const mk = L.marker([o.lat, o.lon], {
-      icon: L.divIcon({ className: "outpost-star", html: "★", iconSize: [22, 22], iconAnchor: [11, 11] }),
+    // Zone 1: 30-min primary (green, more visible)
+    L.circle([o.lat, o.lon], {
+      radius: minutes * 666.7, color: "#22d3a7", weight: 2,
+      fillColor: "#22d3a7", fillOpacity: 0.15, dashArray: "6 6",
+    }).addTo(outpostLayer).bindTooltip(`${minutes}-min reach zone`, { sticky: true });
+    // Zone 2: 60-min secondary (amber)
+    L.circle([o.lat, o.lon], {
+      radius: minutes * 1333.4, color: "#f39c12", weight: 1.5,
+      fillColor: "#f39c12", fillOpacity: 0.06, dashArray: "3 7",
+    }).addTo(outpostLayer).bindTooltip(`${minutes * 2}-min extended zone`, { sticky: true });
+
+    // Hub-and-spoke: lines from outpost to each circuit village
+    o.circuit_village_ids.forEach((vid) => {
+      const v = villagesById.get(vid);
+      if (!v) return;
+      L.polyline([[o.lat, o.lon], [v.Latitude, v.Longitude]], {
+        color: "#22d3a7", weight: 0.6, opacity: 0.3, dashArray: "2 4",
+      }).addTo(circuitLayer);
+      L.circleMarker([v.Latitude, v.Longitude], {
+        radius: 2, color: "#22d3a7", weight: 0.5, fillColor: "#22d3a7", fillOpacity: 0.7,
+      }).addTo(circuitLayer);
     });
+
+    // Outpost marker with permanent label
+    const mk = L.marker([o.lat, o.lon], {
+      icon: L.divIcon({ className: "outpost-star", html: "★", iconSize: [28, 28], iconAnchor: [14, 14] }),
+    });
+    mk.bindTooltip(`<b>${o.outpost_id}</b> · ${o.staged_at ?? ""}`, { permanent: true, direction: "top", offset: [0, -14] });
     mk.bindPopup(
-      `<b>${o.outpost_id}</b> · anchor: ${o.anchor_district}<br>` +
-      `Staged at: ${o.staged_at ?? "cluster centroid"}<br>` +
-      `${o.staged_info ?? ""}<br>` +
-      `Circuit: ${fmt(o.circuit_villages)} villages · ${fmt(o.circuit_population)} people<br>` +
-      `Mean need: ${o.circuit_mean_need}<br>` +
-      `30-min emergency reach: +${o.emergency_new_villages} villages`
+      `<div style="min-width:260px">` +
+      `<b style="font-size:14px;color:#22d3a7">${o.outpost_id}</b><br>` +
+      `<b>${o.staged_at ?? "cluster centroid"}</b><br>` +
+      `<span style="font-size:10px;color:#8ea0c0">${o.staged_info ?? ""}</span><hr>` +
+      `<b>Serves ${fmt(o.circuit_villages)} villages</b> (${fmt(o.circuit_population)} people)<br>` +
+      `📍 Avg distance to villages: <b>${o.avg_distance_km ?? "—"} km</b><br>` +
+      `📍 Farthest village: <b>${o.max_distance_km ?? "—"} km</b><br>` +
+      `⏱️ Villages within 30-min reach: <b>${o.villages_within_30min ?? "—"}</b><br>` +
+      `🏥 Anchor district: ${o.anchor_district}<br>` +
+      `📊 Health need score: ${o.circuit_mean_need}<hr>` +
+      `<button class="popup-btn" onclick='loadIntel(${JSON.stringify(o)})'>🧪 Medical intel & supply route</button>` +
+      `</div>`
     );
     mk.on("click", (e) => {
       L.DomEvent.stopPropagation(e);
@@ -474,14 +497,29 @@ function drawOutposts(r, minutes) {
       else loadIntel(o);
     });
     mk.addTo(outpostLayer);
-    o.circuit_village_ids.forEach((vid) => {
-      const v = villagesById.get(vid);
-      if (!v) return;
-      L.circleMarker([v.Latitude, v.Longitude], {
-        radius: 1.6, color: "#22d3a7", weight: 0.5, fillColor: "#22d3a7", fillOpacity: 0.8,
-      }).addTo(circuitLayer);
-    });
   });
+
+  // Coverage summary card — THE HERO ELEMENT
+  const sc = document.getElementById("coverage-summary");
+  if (sc && r.outposts.length) {
+    const totalV = r.outposts.reduce((s, o) => s + o.circuit_villages, 0);
+    const totalP = r.outposts.reduce((s, o) => s + o.circuit_population, 0);
+    const avgD = r.outposts.reduce((s, o) => s + (o.avg_distance_km || 0), 0) / r.outposts.length;
+    sc.style.display = "block";
+    sc.innerHTML = `<h3>✅ ${r.outposts.length} Mobile Clinic${r.outposts.length > 1 ? "s" : ""} Deployed</h3>` +
+      `<div class="stat-row">` +
+      `<div class="stat"><div class="v">${fmt(totalV)}</div><div class="l">villages now served</div></div>` +
+      `<div class="stat"><div class="v">${totalP > 1e6 ? (totalP / 1e6).toFixed(1) + "M" : fmt(totalP)}</div><div class="l">people covered</div></div>` +
+      `<div class="stat"><div class="v">${r.scheduled_care.coverage_pct_villages}%</div><div class="l">total coverage</div></div>` +
+      `</div>` +
+      `<div class="stat-row">` +
+      `<div class="stat"><div class="v">${r.baseline.coverage_pct_villages}%</div><div class="l">before</div></div>` +
+      `<div class="stat"><div class="v">→</div><div class="l"></div></div>` +
+      `<div class="stat"><div class="v">${r.scheduled_care.coverage_pct_villages}%</div><div class="l">after</div></div>` +
+      `<div class="stat"><div class="v">${avgD.toFixed(0)}km</div><div class="l">avg distance</div></div>` +
+      `</div>` +
+      `<div class="meta" style="margin-top:8px">Click any ⭐ for details · distances · supply routes · medicine stock</div>`;
+  }
 }
 
 /* --------------------------------------------------------------------- SOS */

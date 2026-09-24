@@ -41,13 +41,14 @@
     </div>
 
     <div class="section">
-      <h2>Plan This Area</h2>
-      <div class="hint" id="optimize-hint" style="color: var(--amber); font-weight: 700;">⚠️ Draw an area on the map first (use the rectangle, circle, or polygon tool)</div>
-      <label>Fleet size: <b id="fleet-val">3</b> MMUs</label>
+      <h2>Plan Mobile Clinics</h2>
+      <div class="hint" id="optimize-hint" style="color: var(--amber); font-weight: 700;">⚠️ Draw an area on the map (rectangle, circle, or polygon tool)</div>
+      <label>Number of mobile clinics (MMUs): <b id="fleet-val">3</b></label>
       <input type="range" id="fleet" min="1" max="8" value="3">
-      <label>Max travel: <b id="minutes-val">30</b> min</label>
+      <label>Target travel time: <b id="minutes-val">30</b> min</label>
       <input type="range" id="minutes" min="15" max="60" value="30" step="5">
-      <button id="btn-optimize" disabled style="opacity: 0.5; cursor: not-allowed;">⚡ Run Spatial Optimization</button>
+      <button id="btn-optimize" disabled style="opacity: 0.5; cursor: not-allowed;">⚡ Find Optimal Clinic Locations</button>
+      <div class="hint">The AI places each clinic at a real hospital/clinic, maximizing coverage for underserved villages</div>
     </div>
 
     <div class="section">
@@ -91,6 +92,8 @@
 
   <div id="map"></div>
   <div id="area-stats"></div>
+  <div id="coverage-summary" style="display:none; position: fixed; bottom: 90px; right: 320px; background: var(--card); border: 2px solid var(--accent); border-radius: 12px; padding: 14px 18px; z-index: 8500; max-width: 320px; box-shadow: 0 8px 32px rgba(0,0,0,.6);">
+  </div>
   <div id="onboarding" style="position: fixed; top: 90px; left: calc(272px + (100% - 572px) / 2); transform: translateX(-25%); background: var(--card); border: 2px solid var(--accent); border-radius: 12px; padding: 16px 20px; z-index: 9500; max-width: 420px; box-shadow: 0 8px 32px rgba(0,0,0,.6);">
     <h3 style="font-size:14px;color:var(--accent);margin-bottom:8px;">👋 How to use this console</h3>
     <ol style="font-size:12px;line-height:1.6;color:var(--text);padding-left:18px;margin-bottom:10px;">

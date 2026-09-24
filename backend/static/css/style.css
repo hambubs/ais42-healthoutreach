@@ -59,7 +59,14 @@ button.secondary { background: var(--card); color: var(--text); border: 1px soli
 .dispatch-item .meta { color: var(--muted); font-size: 10px; margin-top: 2px; }
 .handoff { background: #0f2a24; border: 1px solid var(--accent); border-radius: 6px; padding: 8px; margin-top: 6px; font-size: 11px; line-height: 1.5; }
 
-.outpost-star { color: var(--accent); font-size: 20px; text-shadow: 0 0 8px rgba(34, 211, 167, .8); text-align: center; }
+.outpost-star { color: var(--accent); font-size: 26px; text-shadow: 0 0 12px rgba(34, 211, 167, .9), 0 0 4px rgba(34, 211, 167, 1); text-align: center; font-weight: 900; }
+
+#coverage-summary h3 { font-size: 14px; color: var(--accent); margin-bottom: 8px; }
+#coverage-summary .stat-row { display: flex; gap: 16px; margin-bottom: 6px; }
+#coverage-summary .stat { text-align: center; }
+#coverage-summary .v { font-size: 18px; font-weight: 800; color: var(--accent); }
+#coverage-summary .l { font-size: 9px; color: var(--muted); text-transform: uppercase; }
+#coverage-summary .meta { font-size: 10px; color: var(--muted); margin-top: 4px; }
 .sos-pin { font-size: 13px; text-align: center; }
 .pulse { position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; margin: -13px; border: 2px solid var(--red); border-radius: 50%; animation: pulse 1.6s infinite; }
 @keyframes pulse { 0% { transform: scale(.4); opacity: 1; } 100% { transform: scale(1.8); opacity: 0; } }

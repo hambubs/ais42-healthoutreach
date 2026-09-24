@@ -290,6 +290,12 @@ def optimize(fleet_size: int = 3, max_minutes: int = 30,
             staged_info = f"population {int(hv['Population']):,}"
 
         final_positions.append((o_lat, o_lon))
+        # Distance metrics: how far are the served villages from this outpost?
+        circuit_lats = circuit["Latitude"].to_numpy()
+        circuit_lons = circuit["Longitude"].to_numpy()
+        d_vill = pairwise_haversine_km(
+            np.array([[o_lat, o_lon]]),
+            np.column_stack([circuit_lats, circuit_lons]))[0]
         outposts.append({
             "outpost_id": f"MMU-{rank:02d}",
             "lat": round(o_lat, 5),
@@ -301,6 +307,9 @@ def optimize(fleet_size: int = 3, max_minutes: int = 30,
             "circuit_population": int(pop[idx].sum()),
             "circuit_mean_need": round(float(c["mean_need"]), 3),
             "anchor_district": str(district.iloc[0]) if len(district) else "",
+            "avg_distance_km": round(float(d_vill.mean()), 1),
+            "max_distance_km": round(float(d_vill.max()), 1),
+            "villages_within_30min": int((d_vill <= 25).sum()),
             "circuit_village_ids": circuit["Village_ID"].tolist(),
         })
 
