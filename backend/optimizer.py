@@ -251,9 +251,9 @@ def optimize(fleet_size: int = 3, max_minutes: int = 30,
         covered_sched[cluster_indices[j]] = True
 
     # ---- re-anchor each outpost to a REAL place ------------------------------
+    # Population-weighted centroid (not geometric) → then nearest real facility.
     # An MMU stages from an actual health facility (government directory) —
-    # never an arbitrary map point. Fallback: the highest-need village of the
-    # circuit when no facility lies within 50 km.
+    # never an arbitrary map point. Fallback: the highest-need village.
     fac_coords = fac[["lat", "lon"]].to_numpy()
     outposts = []
     final_positions = []
@@ -263,7 +263,17 @@ def optimize(fleet_size: int = 3, max_minutes: int = 30,
         circuit = v.iloc[idx]
         district = circuit["District"].mode()
 
-        d_fac = pairwise_haversine_km(np.array([[c["lat"], c["lon"]]]), fac_coords)[0]
+        # Population-weighted centroid: the outpost gravitates toward where
+        # people actually live, not the geometric middle of the cluster
+        c_pop = pop[idx]
+        total_pop = c_pop.sum()
+        if total_pop > 0:
+            wlat = float((circuit["Latitude"].to_numpy() * c_pop).sum() / total_pop)
+            wlon = float((circuit["Longitude"].to_numpy() * c_pop).sum() / total_pop)
+        else:
+            wlat, wlon = float(c["lat"]), float(c["lon"])
+
+        d_fac = pairwise_haversine_km(np.array([[wlat, wlon]]), fac_coords)[0]
         fi = int(np.argmin(d_fac))
         f_row = fac.iloc[fi]
         if d_fac[fi] <= 50.0:

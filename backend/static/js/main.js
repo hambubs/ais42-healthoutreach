@@ -81,6 +81,7 @@ async function loadVillages() {
     villagesData = await api("/api/villages");
     villagesData.forEach((v) => villagesById.set(v.Village_ID, v));
     drawVillages();
+    populateVillageSelect();
   } catch (e) { toast("Failed to load villages: " + e.message); }
 }
 function drawVillages() {
@@ -217,6 +218,7 @@ function doSearch(q) {
 function onShapeRemoved() {
   drawLayer = null; activeRegion = null;
   document.getElementById("area-stats").style.display = "none";
+  enableOptimize(false);
 }
 
 function enableOptimize(on) {
@@ -538,6 +540,7 @@ async function dispatch(payload, modeOverride) {
     });
     renderDispatch(job);
     if (job.handoff) drawUavRoute(job.handoff);
+    else if (job.pickup_lat != null) drawGroundRoute(job);
     toast(`Dispatched ${job.mode}${job.eta_min ? " · ETA " + job.eta_min + " min" : ""}`);
   } catch (e) { toast("Dispatch failed: " + e.message); }
 }
@@ -582,6 +585,25 @@ function drawUavRoute(h) {
     radius: 5, color: "#e74c3c", fillColor: "#e74c3c", fillOpacity: 0.9,
   }).bindPopup("<b>Drop zone</b><br>UAV payload delivery").addTo(dispatchLayer);
   map.fitBounds([[h.pickup.lat, h.pickup.lon], [h.drop.lat, h.drop.lon]].map((c) => c), { padding: [40, 40] });
+}
+
+function drawGroundRoute(job) {
+  dispatchLayer.clearLayers();
+  const col = MODE_COLORS[job.mode] || "#3b82f6";
+  const isAir = job.mode === "helicopter";
+  L.polyline([[job.pickup_lat, job.pickup_lon], [job.lat, job.lon]], {
+    color: col, weight: 3, dashArray: isAir ? "8 6" : undefined,
+    opacity: 0.8,
+  }).addTo(dispatchLayer)
+    .bindPopup(`<b>${job.mode.replace("_", " ").toUpperCase()} route</b><br>` +
+      `From: ${job.pickup_name}<br>ETA: ${job.eta_min} min`);
+  L.circleMarker([job.pickup_lat, job.pickup_lon], {
+    radius: 5, color: col, fillColor: col, fillOpacity: 0.9,
+  }).bindPopup(`<b>Dispatch from</b><br>${job.pickup_name}`).addTo(dispatchLayer);
+  L.circleMarker([job.lat, job.lon], {
+    radius: 6, color: "#e74c3c", fillColor: "#e74c3c", fillOpacity: 0.9,
+  }).bindPopup(`<b>Emergency location</b><br>${job.mode.replace("_", " ")} dispatched`).addTo(dispatchLayer);
+  map.fitBounds([[job.pickup_lat, job.pickup_lon], [job.lat, job.lon]], { padding: [40, 40] });
 }
 function onMapClick(e) {
   if (!selectedMode) return;

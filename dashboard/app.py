@@ -143,6 +143,9 @@ with tab1:
                 "Green circle = 30-min reach · Amber circle = 60-min reach")
 
     vf = villages[villages["State"].isin(states)] if states else villages
+    # Sample to keep the browser responsive (12k markers crashes most browsers)
+    if len(vf) > 3000:
+        vf = vf.sample(3000, random_state=42)
     m = folium.Map(location=[22.8, 80.5], zoom_start=5, tiles=ESRI_DARK, attr="Esri")
     folium.GeoJson(
         load_geojson(),
@@ -311,9 +314,9 @@ DHS_INDICATORS = {
     "CN_ANMC_C_ANY": "Children with any anemia (under 5)",
     "RH_ANCP_W_DOC": "Antenatal care from a doctor",
     "FE_FRTR_W_TFR": "Total fertility rate",
-    "ML_FEVT_C_DPT": "DPT immunization coverage",
-    "WS_SRCE_PHN": "Households with clean drinking water",
-    "NU_HH_W_ANH": "Households using clean cooking fuel",
+    "CH_VACS_C_DP3": "DPT immunization coverage",
+    "WS_SRCE_H_IMP": "Households with clean drinking water",
+    "HC_CKFL_H_CLN": "Households using clean cooking fuel",
 }
 
 with tab3:

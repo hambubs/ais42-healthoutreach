@@ -24,6 +24,10 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + str(BASE / "app.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 
+# Ensure tables exist even under gunicorn (Render) where __main__ never runs
+with app.app_context():
+    db.create_all()
+
 
 # ------------------------------------------------------------------ static UI
 @app.get("/")
@@ -397,10 +401,13 @@ def api_dispatch():
         return jsonify({"error": "provide lat/lon, alert_id or outpost_id"}), 400
 
     handoff, eta, pickup_name = None, None, None
+    pickup_lat, pickup_lon = None, None
     if mode == "uav":
         handoff = optimizer.uav_handoff(float(lat), float(lon))
         eta = handoff["eta_min"]
         pickup_name = handoff["pickup"]["name"]
+        pickup_lat = handoff["pickup"]["lat"]
+        pickup_lon = handoff["pickup"]["lon"]
     elif mode != "outpost":
         speed = optimizer.DISPATCH_MODES[mode]["speed_kmph"] or 25.0
         _, fac, _ = optimizer.load_data()
@@ -414,7 +421,10 @@ def api_dispatch():
             if pref in row.index and bool(row[pref]) and dists[i] <= 100.0:
                 pick = int(i)
                 break
-        pickup_name = str(fac.iloc[pick]["Hospital_Name"])[:80]
+        f_row = fac.iloc[pick]
+        pickup_name = str(f_row["Hospital_Name"])[:80]
+        pickup_lat = round(float(f_row["lat"]), 5)
+        pickup_lon = round(float(f_row["lon"]), 5)
         eta = round(float(dists[pick]) / speed * 60.0, 1)
 
     job = DispatchJob(alert_id=alert_id, outpost_id=outpost_id, mode=mode,
@@ -425,7 +435,8 @@ def api_dispatch():
         if a:
             a.status = "dispatched"
     db.session.commit()
-    return jsonify({**job.to_dict(), "pickup_name": pickup_name})
+    return jsonify({**job.to_dict(), "pickup_name": pickup_name,
+                    "pickup_lat": pickup_lat, "pickup_lon": pickup_lon})
 
 
 @app.get("/api/dispatches")
