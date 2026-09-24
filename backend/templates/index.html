@@ -91,6 +91,17 @@
 
   <div id="map"></div>
   <div id="area-stats"></div>
+  <div id="onboarding" style="position: fixed; top: 90px; left: calc(272px + (100% - 572px) / 2); transform: translateX(-25%); background: var(--card); border: 2px solid var(--accent); border-radius: 12px; padding: 16px 20px; z-index: 9500; max-width: 420px; box-shadow: 0 8px 32px rgba(0,0,0,.6);">
+    <h3 style="font-size:14px;color:var(--accent);margin-bottom:8px;">👋 How to use this console</h3>
+    <ol style="font-size:12px;line-height:1.6;color:var(--text);padding-left:18px;margin-bottom:10px;">
+      <li><b>Draw an area</b> — use the ⬛ rectangle, ⭕ circle, or ✏️ polygon tool on the map (top-left)</li>
+      <li><b>Adjust the sliders</b> — how many mobile clinics (MMUs) and the target travel time</li>
+      <li><b>Click ⚡ Run Spatial Optimization</b> — the AI places clinics at real hospitals within your area</li>
+      <li><b>Click any village/hospital</b> — see details + send emergency services</li>
+      <li><b>Click a ⭐ clinic</b> — see disease data, medicine stock, and supply routes</li>
+    </ol>
+    <button onclick="document.getElementById('onboarding').style.display='none'" style="width:auto;padding:6px 14px;font-size:11px;">Got it ✕</button>
+  </div>
 
   <aside id="rightbar">
     <div class="section"><h2>Live SOS Feed</h2><div id="sos-feed"><div class="hint">Waiting for alerts…</div></div></div>
