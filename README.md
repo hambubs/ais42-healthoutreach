@@ -1,4 +1,4 @@
-# AIS-42 HealthOutreach
+﻿# AIS-42 HealthOutreach
 
 **PS-4B: Rural Healthcare Reachability & Outpost Planning** — AI for Sustainability Hackathon 2026
 Team AIS-42 · Track 4: Sustainable Healthcare · SDG 3 & 10
@@ -27,7 +27,7 @@ powershell -ExecutionPolicy Bypass -File .\start_demo.ps1
 | Baseline 30-min coverage | 13.82% of villages (107-min avg travel) |
 | 3 MMUs → scheduled care | 22.84% (14.75M people) |
 | 5 / 8 MMUs | 28.58% / 36.68% |
-| 30-min emergency (3 MMUs) | 13.82% → 15.69% (bridged by dispatch modes) |
+| 30-min emergency (3 MMUs) | 13.82% → 15.09% (bridged by dispatch modes) |
 
 ## Doc index
 

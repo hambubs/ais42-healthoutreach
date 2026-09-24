@@ -1,4 +1,4 @@
-"""
+﻿"""
 Generate AIS-42_PS-4B.pptx — the Team AIS-42 presentation deck.
 Run:  .venv\\Scripts\\python scripts\\make_deck.py   ->  deck/AIS-42_PS-4B.pptx
 """
@@ -178,7 +178,7 @@ content_slide(
     [
         ("3 MMUs → 22.84% (14.75 million people newly served)", {"bold": True, "color": ACCENT}),
         ("5 MMUs → 28.58%   ·   8 MMUs → 36.68%", {}),
-        ("30-min emergency coverage: 13.82% → 15.69% with 3 MMUs — the gap is bridged by dispatch modes", {}),
+        ("30-min emergency coverage: 13.82% → 15.09% with 3 MMUs — the gap is bridged by dispatch modes", {}),
         ("Zipline field benchmarks: −61% blood delivery time (Rwanda) · −60% vaccine stock-outs (Ghana)", {"color": MUTED}),
     ],
     big="13.82%  →  22.84%",

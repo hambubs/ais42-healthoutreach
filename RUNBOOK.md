@@ -1,4 +1,4 @@
-# 🎯 RUNBOOK — Verify · Flash · Rehearse
+﻿# 🎯 RUNBOOK — Verify · Flash · Rehearse
 
 Team AIS-42 · PS-4B · Presentations 10 AM Sep 25, JC Road Campus
 **Laptop LAN IP (home Wi-Fi): `192.168.0.145`** — re-check at the venue with `ipconfig` (Wi-Fi adapter)
@@ -32,7 +32,7 @@ Dark Leaflet command console: zoom-LOD (district bubbles → villages → facili
 ### F. Verified numbers (for the deck) — FINAL, everyone quotes these
 - Baseline: 13.82% villages within 30-min · 2,611 underserved · 107-min avg travel
 - 3 MMUs → scheduled care **22.84%** (14.75M people) · 5 MMUs → 28.58% · 8 MMUs → 36.68%
-- 30-min emergency coverage: 13.82% → 15.69% with 3 MMUs (bridged by dispatch modes)
+- 30-min emergency coverage: 13.82% → 15.09% with 3 MMUs (bridged by dispatch modes)
 - UAV trigger: villages with Road=Poor AND Risk=High → air dispatch (rule engine)
 - HeiGIT validation: UP 24.9% / MP 16.0% within 30-min (independent WorldPop-based analysis)
 - DHS live: India child anemia 2019-21 = 68.1% (verified via API)

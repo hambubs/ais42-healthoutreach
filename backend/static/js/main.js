@@ -498,9 +498,17 @@ function drawOutposts(r, minutes) {
       `📊 Health need score: ${o.circuit_mean_need}<hr>` +
       `<b style="font-size:11px">📦 Supply hub: ${o.supply_hub ?? "—"}</b><br>` +
       `<span style="font-size:10px;color:#8ea0c0">${o.supply_info ?? ""} · ${o.supply_distance_km ?? "—"} km away</span><hr>` +
-      `<button class="popup-btn" onclick="loadIntel(outposts[${opIdx}])">🧪 Health risks, medicines & supply routes</button>` +
+      `<button class="popup-btn" id="intel-btn-${opIdx}">🧪 Health risks, medicines & supply routes</button>` +
       `</div>`
     );
+    mk.on("popupopen", () => {
+      const btn = document.getElementById(`intel-btn-${opIdx}`);
+      if (btn) btn.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        map.closePopup();
+        loadIntel(outposts[opIdx]);
+      });
+    });
     mk.on("click", (e) => {
       L.DomEvent.stopPropagation(e);
       if (selectedMode) dispatch({ outpost_id: o.outpost_id, lat: o.lat, lon: o.lon });

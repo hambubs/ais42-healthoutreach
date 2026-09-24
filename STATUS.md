@@ -1,4 +1,4 @@
-# AIS-42 HealthOutreach — Project Status
+﻿# AIS-42 HealthOutreach — Project Status
 
 **Team AIS-42 · PS-4B Rural Healthcare Reachability & Outpost Planning**
 **AI for Sustainability Hackathon 2026 · Presentations 10 AM Sep 25, JC Road Campus**
@@ -23,7 +23,7 @@
   greedy MCLP → dual coverage metrics (30-min emergency + scheduled MMU care)
 - `backend/models.py` — SosAlert, DispatchJob, Outpost, MmuTrack
 - **Verified results (final, post geo-normalization): 3 MMUs → scheduled care 13.82% → 22.84%
-  (14.75M people); 5 MMUs → 28.58%; 8 MMUs → 36.68%. 30-min emergency: 13.82% → 15.69% (3 MMUs).
+  (14.75M people); 5 MMUs → 28.58%; 8 MMUs → 36.68%. 30-min emergency: 13.82% → 15.09% (3 MMUs).
   UAV handoff card: TechEagle-class Vertiplane X3 specs, nearest emergency facility pickup, DGCA DigitalSky NPNT.**
 
 ### Phase 2 — Ops Console (COMPLETE, live-tested)

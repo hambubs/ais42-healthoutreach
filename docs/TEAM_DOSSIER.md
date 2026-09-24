@@ -1,4 +1,4 @@
-# AIS-42 HealthOutreach — Team Dossier
+﻿# AIS-42 HealthOutreach — Team Dossier
 
 **PS-4B: Rural Healthcare Reachability & Outpost Planning** · AI for Sustainability Hackathon 2026
 Team AIS-42 — Sahil Rai · Ashmita Roy · Subhalaxmi Sahoo · Punit Kumar · SDG 3 & 10
@@ -135,7 +135,7 @@ nearest-facility pickup, UAV handoff JSON) · `POST /api/supply-route` (land + a
 5. **Re-anchoring** — every outpost is staged at the nearest REAL facility (≤50 km), with
    beds/doctors/emergency status; fallback = highest-need village. Emergency coverage is
    recomputed from the final real positions.
-6. **Dual metrics** — strict 30-min emergency coverage (13.82→15.69% with 3 MMUs) +
+6. **Dual metrics** — strict 30-min emergency coverage (13.82→15.09% with 3 MMUs) +
    scheduled circuit care (13.82→22.84%) — the gap is bridged by the dispatch engine.
 7. **Dispatch rules** — trauma/maternal on poor+high-risk terrain → helicopter airlift;
    supplies on poor+high-risk → UAV; poor roads → 2W rider; default → MMU van.

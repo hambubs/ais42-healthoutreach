@@ -104,8 +104,9 @@ if run:
 if result:
     st.header("✅ The Solution — Your Results")
     st.markdown(f"""
-    We placed **{len(result['outposts'])} mobile clinics** at existing hospitals and health centers.
-    Here's the impact:
+    We placed **{len(result['outposts'])} mobile clinics** at population centers — where underserved
+    villages actually are. Each clinic has a nearby hospital as its supply hub for
+    medicines and emergency backup. Here's the impact:
     """)
 
     d1, d2, d3 = st.columns(3)
@@ -164,10 +165,11 @@ with tab1:
             folium.Marker(
                 [o["lat"], o["lon"]], icon=folium.Icon(color="green", icon="star"),
                 popup=folium.Popup(
-                    f"<b>{o['outpost_id']}</b> — {o['anchor_district']} district<br>"
-                    f"<b>Staged at:</b> {o.get('staged_at', '—')}<br>"
+                    f"<b>{o['outpost_id']}</b> — Mobile Clinic Camp<br>"
+                    f"Anchor: {o['anchor_district']}<br>"
                     f"Serves {o['circuit_villages']:,} villages ({o['circuit_population']:,} people)<br>"
-                    f"Average health need score: {o['circuit_mean_need']}",
+                    f"Avg distance: {o.get('avg_distance_km', '—')} km<br>"
+                    f"Supply hub: {o.get('supply_hub', '—')} ({o.get('supply_distance_km', '—')} km)",
                     max_width=300,
                 ),
             ).add_to(m)
@@ -232,13 +234,15 @@ with tab1:
         st.plotly_chart(fig4, use_container_width=True)
 
     if result:
-        st.subheader("Where each clinic is based")
+        st.subheader("Clinic deployment details")
         st.dataframe(pd.DataFrame([{
             "Clinic": o["outpost_id"],
             "District": o["anchor_district"],
-            "Based at (real hospital/clinic)": o.get("staged_at", "—"),
+            "Supply hub (nearest hospital)": o.get("supply_hub", "—"),
+            "Supply distance": f"{o.get('supply_distance_km', '—')} km",
             "Villages served": o["circuit_villages"],
             "People covered": f"{o['circuit_population']:,}",
+            "Avg distance to villages": f"{o.get('avg_distance_km', '—')} km",
         } for o in result["outposts"]]), use_container_width=True)
 
     st.divider()

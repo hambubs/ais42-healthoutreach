@@ -1,4 +1,4 @@
-# Team Task Board — pick what you want
+﻿# Team Task Board — pick what you want
 
 **How to use:** claim a task by putting your name next to it (message the group or edit this file).
 Nobody is assigned anything — take what suits you. Everything here needs **no repo access** unless marked.
@@ -31,7 +31,7 @@ Nobody is assigned anything — take what suits you. Everything here needs **no 
 | Underserved villages | **2,611** |
 | 3 MMUs → scheduled care | **22.84%** (14.75M people) |
 | 5 MMUs / 8 MMUs | **28.58% / 36.68%** |
-| 30-min emergency (3 MMUs) | 13.82% → 15.69% |
+| 30-min emergency (3 MMUs) | 13.82% → 15.09% |
 | UAV partner spec | TechEagle-class Vertiplane X3 · DGCA DigitalSky NPNT |
 
 **Honesty line (say it proudly):** "The provided coordinates were synthetic-uniform — we normalized them

@@ -278,9 +278,18 @@ def optimize(fleet_size: int = 3, max_minutes: int = 30,
         f_row = fac.iloc[fi]
         supply_name = str(f_row["Hospital_Name"])[:80]
         supply_dist = round(float(d_fac[fi]), 1)
-        supply_info = f"{int(f_row['beds'])} beds · {int(f_row['doctors'])} doctors"
+        beds = int(f_row["beds"]) if f_row["beds"] and int(f_row["beds"]) > 0 else None
+        docs = int(f_row["doctors"]) if f_row["doctors"] and int(f_row["doctors"]) > 0 else None
+        supply_parts = []
+        if beds:
+            supply_parts.append(f"{beds} beds")
+        if docs:
+            supply_parts.append(f"{docs} doctors")
         if bool(f_row["has_emergency"]):
-            supply_info += " · ⚡ emergency"
+            supply_parts.append("⚡ emergency")
+        if bool(f_row["has_ambulance"]):
+            supply_parts.append("🚑 ambulance")
+        supply_info = " · ".join(supply_parts) if supply_parts else "district health facility"
 
         final_positions.append((o_lat, o_lon))
         # Distance metrics: how far are the served villages from this outpost?
