@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AIS-42 HealthOutreach — PS-4B</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/black.css">
+<style>
+  :root { --accent:#22d3a7; --muted:#8ea0c0; --red:#e74c3c; }
+  .reveal { font-family:"Segoe UI",system-ui,sans-serif; font-size:30px; }
+  .reveal h1,.reveal h2,.reveal h3 { font-weight:700; text-transform:none; letter-spacing:0; }
+  .reveal h2 { color:var(--accent); font-size:44px; margin-bottom:18px; }
+  .reveal .kicker { color:var(--muted); font-size:20px; margin-bottom:26px; }
+  .reveal ul { line-height:1.55; }
+  .reveal li { margin-bottom:14px; }
+  .reveal .big { font-size:72px; font-weight:800; color:#fff; margin:30px 0; }
+  .reveal .accent { color:var(--accent); font-weight:700; }
+  .reveal .muted { color:var(--muted); }
+  .reveal table { font-size:22px; border-collapse:collapse; margin:20px auto; }
+  .reveal td,.reveal th { border:1px solid #2a3a55; padding:10px 18px; }
+  .reveal th { color:var(--accent); }
+  .reveal .footer { position:fixed; bottom:14px; left:4%; right:4%; font-size:13px; color:var(--muted); text-align:center; }
+  .stat-grid { display:flex; gap:30px; justify-content:center; margin:26px 0; }
+  .stat { background:#16233d; border:1px solid #1e2a44; border-radius:12px; padding:18px 28px; text-align:center; }
+  .stat .v { font-size:44px; font-weight:800; color:var(--accent); }
+  .stat .l { font-size:16px; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="reveal"><div class="slides">
+
+<section>
+  <h1 style="color:var(--accent)">HealthOutreach</h1>
+  <h3>Rural Healthcare Reachability & Outpost Planning</h3>
+  <p class="muted">Team AIS-42 — Sahil Rai · Ashmita Roy · Subhalaxmi Sahoo · Punit Kumar</p>
+  <p class="muted">AI for Sustainability Hackathon 2026 · Track 4: Sustainable Healthcare · SDG 3 & 10</p>
+  <p class="accent" style="margin-top:40px">Spatial AI · Offline Edge SOS · Multi-Modal Dispatch</p>
+</section>
+
+<section>
+  <h2>The Problem: Care Is 107 Minutes Away</h2>
+  <p class="kicker">Provided dataset: 12,000 villages across UP, MP, Maharashtra, Rajasthan, Bihar</p>
+  <div class="stat-grid">
+    <div class="stat"><div class="v">13.82%</div><div class="l">villages within 30 min of care</div></div>
+    <div class="stat"><div class="v">107 min</div><div class="l">avg travel to nearest facility</div></div>
+    <div class="stat"><div class="v">2,611</div><div class="l">underserved villages</div></div>
+  </div>
+  <ul>
+    <li>30.4 km average distance to a hospital · 4,030 poor-road · 3,118 high-risk</li>
+    <li class="muted">Static facilities cannot reach dispersed rural populations — emergencies do not wait</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Our Solution: One System, Three Layers</h2>
+  <ul>
+    <li><span class="accent">Spatial AI</span> — DBSCAN settlement clustering + greedy MCLP places Mobile Medical Units for <b>maximum area coverage</b></li>
+    <li><span class="accent">Offline Edge</span> — ESP32 captive-portal SOS gateway: zero installs, AES-128 encrypted, works with <b>no cellular</b></li>
+    <li><span class="accent">Multi-Modal Dispatch</span> — ambulance · MMU van · 2W rider · UAV handoff · mobile outpost</li>
+    <li class="muted">Built on the provided datasets, enriched with acknowledged open data (HDX · DHS · WorldPop)</li>
+  </ul>
+</section>
+
+<section>
+  <h2>How It Fits Together</h2>
+  <ul>
+    <li><b>Data spine</b> — provided 12,000-village dataset + 30,273-facility government directory</li>
+    <li><b>Optimizer</b> — Need Score → underserved detection → DBSCAN → greedy MCLP → dual coverage metrics</li>
+    <li><b>Flask API + SQLite</b> — 17 endpoints: optimize · SOS · sync · dispatch · track · DHS · HeiGIT</li>
+    <li><b>Ops Console</b> (Leaflet) — live SOS feed, dispatch cards, UAV flight lines, KPI chips</li>
+    <li><b>Impact Dashboard</b> (Streamlit) — before/after, WorldPop BLR pilot, live DHS API</li>
+    <li><b>Edge</b> — ESP32 "MMU-GATEWAY" + any phone browser → hub tablet → sync when back online</li>
+  </ul>
+</section>
+
+<section>
+  <h2>The AI Core</h2>
+  <p class="kicker">Maximum area coverage, not minimum travel — eliminating medical dead zones</p>
+  <ul>
+    <li class="accent">Need Score = 0.4·population + 0.3·risk + 0.3·inaccessibility</li>
+    <li>Underserved detection: Underserved_Area flag OR travel > 30 min</li>
+    <li>DBSCAN clusters underserved villages into settlement pockets</li>
+    <li>Greedy MCLP: maximize need-weighted population under scheduled care</li>
+    <li>Dual metrics: strict 30-min emergency + scheduled MMU circuit care (NHM model)</li>
+    <li class="muted">Circuits capped at ~400 villages per unit — block-scale, matching NHM practice</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Data — Clean Provenance</h2>
+  <ul>
+    <li><span class="accent">PROVIDED</span> (core of every metric): 12,000-village dataset + 30,273-facility government directory</li>
+    <li><span class="accent">ENRICHMENT</span> (read-only, acknowledged): geoBoundaries (ODC-ODbL) · DHS/NFHS via HDX (CC BY-ND 4.0) · HeiGIT/WorldPop (CC BY-SA) · WorldPop density (CC-BY 4.0)</li>
+    <li class="accent">No-contamination guarantee: enrichment never writes back into provided data</li>
+    <li class="muted">Documented transformation: synthetic-uniform coordinates normalized into district polygons for visualization; originals preserved in Latitude_orig/Longitude_orig</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Independent Validation</h2>
+  <ul>
+    <li><b>HeiGIT / WorldPop isochrone study</b>: 24.9% of UP, 16.0% of MP within 30 min of a hospital — same story, same order of magnitude as our 13.82% village-level baseline</li>
+    <li><b>DHS Program API (live, keyless)</b>: India child anemia 68.1% (NFHS-5 2019-21) — queried live on stage</li>
+    <li class="accent">Every impact number is computed from provided-dataset columns only</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Impact — Before / After</h2>
+  <p class="big">13.82% &nbsp;→&nbsp; <span style="color:var(--accent)">22.84%</span></p>
+  <ul>
+    <li><b>3 MMUs</b> → 22.84% scheduled care = <span class="accent">14.75 million people newly served</span></li>
+    <li><b>5 MMUs</b> → 28.58% &nbsp;·&nbsp; <b>8 MMUs</b> → 36.68%</li>
+    <li>30-min emergency: 13.82% → 15.09% — the gap is bridged by dispatch modes</li>
+    <li class="muted">Zipline benchmarks: −61% blood delivery time (Rwanda) · −60% vaccine stock-outs (Ghana)</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Zero-Connectivity SOS</h2>
+  <p class="kicker">The village has no cell coverage. The phone is in airplane mode.</p>
+  <ul>
+    <li>Phone joins "MMU-GATEWAY" Wi-Fi → captive portal auto-opens — <b>zero installs</b></li>
+    <li>One tap: Trauma / Maternal / Medicine</li>
+    <li><b>AES-128-CBC encrypted at rest</b> (mbedTLS, random IV) → queue in flash</li>
+    <li>Hub tablet pulls the queue → carries it to coverage → syncs → alert appears <span class="accent">LIVE</span> on the console</li>
+    <li class="muted">Fallback: mobile /sos page + console demo triggers — the story never breaks</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Multi-Modal Dispatch</h2>
+  <ul>
+    <li>🚑 Ambulance (60 km/h) · 🚐 MMU Van (40) · 🏍️ 2W Rider (30) · 🚁 UAV (120) · ⛺ Outpost</li>
+    <li class="accent">Road = Poor AND Risk = High → automatic air-dispatch suggestion</li>
+    <li>UAV handoff: TechEagle-class Vertiplane X3 — 3-5 kg, 100 km, DGCA DigitalSky NPNT</li>
+    <li>Route line green when ETA ≤ 30 min, orange beyond</li>
+    <li class="muted">We didn't build drones — we built the brain that aims India's drone-logistics ecosystem</li>
+  </ul>
+</section>
+
+<section>
+  <h2>SDG 3 & SDG 10</h2>
+  <ul>
+    <li><span class="accent">SDG 3.8 — Universal Health Coverage:</span> care travels to the people, not people to care</li>
+    <li><span class="accent">SDG 10.2 — Reduced Inequalities:</span> geography stops being a barrier to survival</li>
+    <li>Equity is hardcoded: the Need Score biases resources toward the least accessible</li>
+    <li class="accent">Every percentage point of coverage = millions of people</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Roadmap & Close</h2>
+  <ul>
+    <li>Real road-network routing (OSRM + PostGIS)</li>
+    <li>Government emergency-API integration for the live SOS feed</li>
+    <li>Karnataka pilot: Bengaluru Rural · Ramanagara · Kolar · Tumakuru</li>
+    <li class="muted">Sources & licenses: DATA_SOURCES.md — provided datasets + HDX · DHS · geoBoundaries · HeiGIT · WorldPop · OSM</li>
+  </ul>
+  <p class="big" style="font-size:48px">Thank you — <span style="color:var(--accent)">Team AIS-42</span> · Questions?</p>
+</section>
+
+</div></div>
+<div class="footer">Team AIS-42 · PS-4B Rural Healthcare Reachability & Outpost Planning · AI for Sustainability Hackathon 2026</div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+<script>Reveal.initialize({hash:true, transition:"fade"});</script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MMU Hub — online sync</title>
+<style>
+:root{--bg:#0b1220;--card:#16233d;--accent:#22d3a7;--text:#e8eefc;--blue:#3b82f6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui;background:var(--bg);color:var(--text);padding:16px}
+h1{font-size:16px;margin-bottom:2px}
+.sub{font-size:11px;color:#8ea0c0;margin-bottom:14px}
+button{background:var(--accent);color:#04241b;border:none;border-radius:8px;padding:12px;font-weight:700;width:100%;margin:8px 0;cursor:pointer}
+button.alt{background:var(--card);color:var(--text);border:1px solid #1e2a44}
+textarea{width:100%;height:170px;background:var(--card);color:var(--text);border:1px solid #1e2a44;border-radius:8px;padding:8px;font-size:11px}
+.ok{color:var(--accent);font-weight:700;margin-top:10px}
+.err{color:#e74c3c;font-weight:700;margin-top:10px}
+.note{font-size:11px;color:#8ea0c0;margin-top:10px;line-height:1.5}
+</style>
+</head>
+<body>
+<h1>📡 MMU Hub — online sync</h1>
+<div class="sub">Paste the offline queue JSON pulled from the gateway — it will sync to the command console</div>
+<textarea id="payload" placeholder='[{"type":"maternal","priority":"critical","node":"VIL-A1B2","ts":123456,"ct_sig":"9F3C21AB"}]'></textarea>
+<button onclick="sync()">&#128228; Sync to HealthOutreach server</button>
+<button class="alt" onclick="demoFill()">&#129300; Fill demo payload (no gateway handy)</button>
+<div id="msg"></div>
+<div class="note">
+  Flow: tablet on <b>MMU-GATEWAY</b> Wi-Fi → open <b>192.168.4.1/hub</b> → Pull → Copy JSON →
+  reconnect to the internet → open this page → paste → Sync. Alerts then appear live on the Ops Console feed.
+</div>
+<script>
+const msg = (t, ok) => { document.getElementById('msg').innerHTML =
+  '<div class="' + (ok ? 'ok' : 'err') + '">' + t + '</div>'; };
+
+async function sync() {
+  let alerts;
+  try { alerts = JSON.parse(document.getElementById('payload').value); }
+  catch (e) { return msg('Invalid JSON — copy the payload again from the gateway hub page', false); }
+  if (!Array.isArray(alerts) || !alerts.length) return msg('Nothing to sync', false);
+  try {
+    const r = await fetch('/api/sync', { method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ alerts: alerts.map(a => ({
+        node_id: a.node || 'VIL-UNKNOWN',
+        sos_type: a.type || 'routine',
+        priority: a.priority || 'normal',
+        lat: a.lat ?? null, lon: a.lon ?? null,
+        source: 'hub_sync' })) }) });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || r.statusText);
+    msg('✅ Synced ' + j.synced + ' offline alert(s) — check the Ops Console feed', true);
+    document.getElementById('payload').value = '';
+  } catch (e) { msg('Sync failed: ' + e.message, false); }
+}
+
+function demoFill() {
+  document.getElementById('payload').value = JSON.stringify([
+    { type: 'maternal', priority: 'critical', node: 'VIL-DEMO1', ts: 900001, ct_sig: '5FA2C910' },
+    { type: 'trauma',   priority: 'critical', node: 'VIL-DEMO2', ts: 900002, ct_sig: '77B1E03D' }]);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "bbox": [
+    76.95,
+    12.6,
+    78.3,
+    13.55
+  ],
+  "total_population_in_bbox": 19012514,
+  "cells": 12959,
+  "cell_size_deg": 0.01,
+  "worldpop_resolution": "1km",
+  "source": "WorldPop Global 2000-2020, India 2020 (UNadj)",
+  "license": "CC-BY 4.0",
+  "url": "https://data.worldpop.org/GIS/Population/Global_2000_2020_1km_UNadj/2020/IND/ind_ppp_2020_1km_Aggregated_UNadj.tif",
+  "pilot_districts": [
+    "Bengaluru Rural",
+    "Ramanagara",
+    "Kolar",
+    "Tumakuru"
+  ]
+}

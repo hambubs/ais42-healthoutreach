@@ -1,0 +1,28 @@
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend/__pycache__/
+
+# SQLite runtime DB
+backend/app.db
+*.db
+*.sqlite3
+
+# Packaging
+AIS-42_team_package.zip
+*.zip
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

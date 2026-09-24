@@ -1,0 +1,11 @@
+{
+  "villages": 12000,
+  "covered_villages_30min": 1659,
+  "coverage_pct_villages": 13.82,
+  "coverage_pct_population": 13.54,
+  "underserved_villages": 2611,
+  "avg_travel_min": 107.0,
+  "avg_distance_km": 30.4,
+  "poor_road_villages": 4030,
+  "high_risk_villages": 3118
+}

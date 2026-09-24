@@ -1,0 +1,49 @@
+state,category,within_30min_pop_share_pct
+Uttar Pradesh,hospitals,24.9
+Sikkim,hospitals,34.74
+Mahārāshtra,hospitals,54.24
+Arunāchal Pradesh,hospitals,9.55
+Himāchal Pradesh,hospitals,44.37
+Tamil Nādu,hospitals,71.98
+Andaman and Nicobar Islands,hospitals,0.8
+Delhi,hospitals,99.88
+Ladākh,hospitals,25.76
+Telangāna,hospitals,60.36
+Bihār,hospitals,14.13
+Meghālaya,hospitals,10.07
+West Bengal,hospitals,31.54
+Uttarākhand,hospitals,25.16
+Rājasthān,hospitals,19.21
+Jammu and Kashmīr,hospitals,45.59
+Kerala,hospitals,94.81
+Mizoram,hospitals,0.26
+Dādra and Nagar Haveli and Damān and Diu,hospitals,70.45
+Jhārkhand,hospitals,25.38
+Karnātaka,hospitals,53.13
+Goa,hospitals,96.72
+Haryāna,hospitals,42.51
+Chhattīsgarh,hospitals,25.36
+Nāgāland,hospitals,37.3
+Madhya Pradesh,hospitals,16.03
+Chandīgarh,hospitals,100.0
+Assam,hospitals,17.81
+Gujarāt,hospitals,45.72
+Puducherry,hospitals,81.37
+Odisha,hospitals,13.78
+Andhra Pradesh,hospitals,47.81
+Punjab,hospitals,55.81
+Manipur,hospitals,49.44
+Uttar Pradesh,primary_healthcare,2.06
+Mahārāshtra,primary_healthcare,19.77
+Arunāchal Pradesh,primary_healthcare,0.22
+Himāchal Pradesh,primary_healthcare,2.31
+Tamil Nādu,primary_healthcare,21.57
+Delhi,primary_healthcare,45.49
+Telangāna,primary_healthcare,25.74
+Uttarākhand,primary_healthcare,0.01
+Kerala,primary_healthcare,5.71
+Karnātaka,primary_healthcare,23.97
+Haryāna,primary_healthcare,9.16
+Assam,primary_healthcare,2.09
+Puducherry,primary_healthcare,9.7
+Punjab,primary_healthcare,12.81
