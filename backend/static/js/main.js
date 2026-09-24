@@ -219,6 +219,21 @@ function onShapeRemoved() {
   document.getElementById("area-stats").style.display = "none";
 }
 
+function enableOptimize(on) {
+  const btn = document.getElementById("btn-optimize");
+  const hint = document.getElementById("optimize-hint");
+  if (!btn) return;
+  btn.disabled = !on;
+  btn.style.opacity = on ? "1" : "0.5";
+  btn.style.cursor = on ? "pointer" : "not-allowed";
+  if (hint) {
+    hint.textContent = on
+      ? "✅ Area selected — adjust the sliders, then click Optimize"
+      : "⚠️ Draw an area on the map first (use the rectangle, circle, or polygon tool)";
+    hint.style.color = on ? "var(--accent)" : "var(--amber)";
+  }
+}
+
 function onShapeCreated(e) {
   if (drawLayer) map.removeLayer(drawLayer);
   drawLayer = e.layer;
@@ -237,6 +252,7 @@ function onShapeCreated(e) {
   }
   activeRegion = region;
   showAreaStats(region, areaKm2);
+  enableOptimize(true);
 }
 
 function polygonAreaKm2(coords) {
