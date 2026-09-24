@@ -1,11 +1,15 @@
+# Render.com deployment configuration
+# Docs: https://render.com/docs/blueprint-spec
+
 services:
   - type: web
     name: ais42-healthoutreach
-    env: python
-    region: singapore
+    runtime: python
     plan: free
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "cd backend && gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 120 app:app"
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    healthCheckPath: /api/baseline
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.0
+        value: "3.13.5"
