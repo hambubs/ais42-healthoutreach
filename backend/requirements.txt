@@ -10,3 +10,4 @@ plotly
 requests
 rasterio
 python-pptx
+gunicorn
