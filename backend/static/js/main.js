@@ -499,26 +499,44 @@ function drawOutposts(r, minutes) {
     mk.addTo(outpostLayer);
   });
 
-  // Coverage summary card — THE HERO ELEMENT
+  // Coverage summary card — THE HERO ELEMENT with per-clinic breakdown
   const sc = document.getElementById("coverage-summary");
   if (sc && r.outposts.length) {
     const totalV = r.outposts.reduce((s, o) => s + o.circuit_villages, 0);
     const totalP = r.outposts.reduce((s, o) => s + o.circuit_population, 0);
     const avgD = r.outposts.reduce((s, o) => s + (o.avg_distance_km || 0), 0) / r.outposts.length;
+    const areaV = villagesData.filter((v) => activeRegion && pointInRegion(v.Latitude, v.Longitude, activeRegion));
+    const areaUnder = areaV.filter((v) => v.Underserved_Area_Flag_bin).length;
+    const covered = r.outposts.reduce((s, o) => s + o.circuit_villages, 0);
+    const stillOut = areaV.length - covered;
+
+    let clinicRows = r.outposts.map((o) =>
+      `<tr><td><b>${o.outpost_id}</b></td>` +
+      `<td>${(o.staged_at ?? "—").substring(0, 22)}</td>` +
+      `<td style="text-align:center">${o.circuit_villages}</td>` +
+      `<td style="text-align:center">${o.circuit_population > 1e6 ? (o.circuit_population / 1e6).toFixed(1) + "M" : fmt(o.circuit_population)}</td>` +
+      `<td style="text-align:center">${o.avg_distance_km ?? "—"}km</td>` +
+      `<td style="text-align:center">${o.max_distance_km ?? "—"}km</td></tr>`
+    ).join("");
+
     sc.style.display = "block";
     sc.innerHTML = `<h3>✅ ${r.outposts.length} Mobile Clinic${r.outposts.length > 1 ? "s" : ""} Deployed</h3>` +
       `<div class="stat-row">` +
-      `<div class="stat"><div class="v">${fmt(totalV)}</div><div class="l">villages now served</div></div>` +
+      `<div class="stat"><div class="v">${fmt(covered)}</div><div class="l">villages served</div></div>` +
       `<div class="stat"><div class="v">${totalP > 1e6 ? (totalP / 1e6).toFixed(1) + "M" : fmt(totalP)}</div><div class="l">people covered</div></div>` +
-      `<div class="stat"><div class="v">${r.scheduled_care.coverage_pct_villages}%</div><div class="l">total coverage</div></div>` +
+      `<div class="stat"><div class="v">${r.scheduled_care.coverage_pct_villages}%</div><div class="l">coverage</div></div>` +
       `</div>` +
       `<div class="stat-row">` +
       `<div class="stat"><div class="v">${r.baseline.coverage_pct_villages}%</div><div class="l">before</div></div>` +
       `<div class="stat"><div class="v">→</div><div class="l"></div></div>` +
       `<div class="stat"><div class="v">${r.scheduled_care.coverage_pct_villages}%</div><div class="l">after</div></div>` +
-      `<div class="stat"><div class="v">${avgD.toFixed(0)}km</div><div class="l">avg distance</div></div>` +
+      `<div class="stat"><div class="v">${avgD.toFixed(0)}km</div><div class="l">avg dist</div></div>` +
       `</div>` +
-      `<div class="meta" style="margin-top:8px">Click any ⭐ for details · distances · supply routes · medicine stock</div>`;
+      `<table style="width:100%;border-collapse:collapse;font-size:10px;margin-top:10px">` +
+      `<tr style="color:var(--muted)"><th>Clinic</th><th>Based at</th><th>Villages</th><th>People</th><th>Avg km</th><th>Max km</th></tr>` +
+      clinicRows + `</table>` +
+      `<div class="meta" style="margin-top:8px">Area: ${areaV.length} villages · ${areaUnder} underserved · ${stillOut > 0 ? stillOut + " still uncovered" : "fully covered!"}</div>` +
+      `<div class="meta">Click any ⭐ for medical intel · supply routes · medicine stock</div>`;
   }
 }
 

@@ -62,11 +62,15 @@ button.secondary { background: var(--card); color: var(--text); border: 1px soli
 .outpost-star { color: var(--accent); font-size: 26px; text-shadow: 0 0 12px rgba(34, 211, 167, .9), 0 0 4px rgba(34, 211, 167, 1); text-align: center; font-weight: 900; }
 
 #coverage-summary h3 { font-size: 14px; color: var(--accent); margin-bottom: 8px; }
-#coverage-summary .stat-row { display: flex; gap: 16px; margin-bottom: 6px; }
+#coverage-summary .stat-row { display: flex; gap: 14px; margin-bottom: 6px; justify-content: center; }
 #coverage-summary .stat { text-align: center; }
-#coverage-summary .v { font-size: 18px; font-weight: 800; color: var(--accent); }
-#coverage-summary .l { font-size: 9px; color: var(--muted); text-transform: uppercase; }
+#coverage-summary .v { font-size: 16px; font-weight: 800; color: var(--accent); }
+#coverage-summary .l { font-size: 8px; color: var(--muted); text-transform: uppercase; }
 #coverage-summary .meta { font-size: 10px; color: var(--muted); margin-top: 4px; }
+#coverage-summary table { border: 1px solid var(--line); }
+#coverage-summary th, #coverage-summary td { padding: 3px 6px; border: 1px solid var(--line); text-align: left; }
+#coverage-summary th { color: var(--muted); font-weight: 600; font-size: 9px; }
+#coverage-summary td { font-size: 10px; color: var(--text); }
 .sos-pin { font-size: 13px; text-align: center; }
 .pulse { position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; margin: -13px; border: 2px solid var(--red); border-radius: 50%; animation: pulse 1.6s infinite; }
 @keyframes pulse { 0% { transform: scale(.4); opacity: 1; } 100% { transform: scale(1.8); opacity: 0; } }
