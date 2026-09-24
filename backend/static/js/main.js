@@ -555,7 +555,7 @@ function renderDispatch(job) {
     rc.style.display = "block";
     rc.innerHTML = `<h3>${(job.mode || "").replace("_", " ").toUpperCase()} dispatched</h3>` +
       `<div class="eta ${fast ? "" : "slow"}">${job.eta_min != null ? job.eta_min + " min" : "—"}</div>` +
-      `<div class="meta">${fast ? "✅ within 30-min target" : "⚠️ exceeds 30-min target — consider air dispatch"}</div>` +
+      `<div class="meta">${job.eta_min == null ? "⛺ staged asset — no transit ETA" : fast ? "✅ within 30-min target" : "⚠️ exceeds 30-min target — consider air dispatch"}</div>` +
       (job.pickup_name ? `<div class="meta">From: ${job.pickup_name}</div>` : "");
   }
 }

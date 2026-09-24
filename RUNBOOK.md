@@ -32,7 +32,7 @@ Dark Leaflet command console: risk-colored villages, facilities, district border
 ### F. Verified numbers (for the deck) — FINAL, everyone quotes these
 - Baseline: 13.82% villages within 30-min · 2,611 underserved · 107-min avg travel
 - 3 MMUs → scheduled care **22.84%** (14.75M people) · 5 MMUs → 28.58% · 8 MMUs → 36.68%
-- 30-min emergency coverage: 13.82% → 15.09% with 3 MMUs (bridged by dispatch modes)
+- 30-min emergency coverage: 13.82% → 15.69% with 3 MMUs (bridged by dispatch modes)
 - UAV trigger: villages with Road=Poor AND Risk=High → air dispatch (rule engine)
 - HeiGIT validation: UP 24.9% / MP 16.0% within 30-min (independent WorldPop-based analysis)
 - DHS live: India child anemia 2019-21 = 68.1% (verified via API)
@@ -48,7 +48,7 @@ powershell -ExecutionPolicy Bypass -File .\start_demo.ps1
 ```
 Both browsers open. On the **Console** (:5000):
 1. Tick "Hospitals & facilities" layer → blue dots appear
-2. Click **⚡ Run Spatial Optimization** → ★ outposts + green rings + KPI chips jump (Scheduled care → ~22.8%)
+2. Click **⚡ Run Spatial Optimization** → ★ outposts + dual coverage rings appear and the toast shows scheduled care → ~22.8%
 3. Click **🆘 Simulate Village SOS** → toast + red pulse on map + feed entry
 4. Click the **🚁 UAV** card → click the SOS point → handoff card + blue flight line
 5. Click **"📊 Impact Dashboard ↗"** → dashboard opens in a new tab
@@ -103,8 +103,8 @@ Stop: `.\stop_demo.ps1`
 ### STEP 6 · Full 5-minute rehearsal (repeat twice)
 | # | Who | Action | Audience sees |
 |---|---|---|---|
-| 1 | Presenter | Console: "12,000 villages, only 13.8% within 30 min of care" | KPI chips |
-| 2 | Presenter | Run Optimization (fleet 3) | ★ outposts, coverage 13.8→24.8%, 17.5M served |
+| 1 | Presenter | Console: "12,000 villages, only 13.8% within 30 min of care" | district bubbles + borders |
+| 2 | Presenter | Run Optimization (fleet 3) | ★ outposts, coverage 13.8→22.8%, 14.75M served |
 | 3 | You | "This village has no cell coverage" — show Phone A in airplane mode | the phone |
 | 4 | Phone A | Join MMU-GATEWAY → portal → tap Maternal SOS | one-tap, zero installs |
 | 5 | Tablet | `/hub` → Pull → show the 🔒 ct_sig | encrypted-at-rest proof |

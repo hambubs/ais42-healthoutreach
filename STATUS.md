@@ -23,7 +23,7 @@
   greedy MCLP → dual coverage metrics (30-min emergency + scheduled MMU care)
 - `backend/models.py` — SosAlert, DispatchJob, Outpost, MmuTrack
 - **Verified results (final, post geo-normalization): 3 MMUs → scheduled care 13.82% → 22.84%
-  (14.75M people); 5 MMUs → 28.58%; 8 MMUs → 36.68%. 30-min emergency: 13.82% → 15.09% (3 MMUs).
+  (14.75M people); 5 MMUs → 28.58%; 8 MMUs → 36.68%. 30-min emergency: 13.82% → 15.69% (3 MMUs).
   UAV handoff card: TechEagle-class Vertiplane X3 specs, nearest emergency facility pickup, DGCA DigitalSky NPNT.**
 
 ### Phase 2 — Ops Console (COMPLETE, live-tested)
@@ -40,8 +40,10 @@
 
 ## ⏳ REMAINING
 
-- **Phase 3** — ESP32 captive-portal SOS sketch + offline hub page (phone/tablet rig)
-- **Phase 5** — Deck: PPT + HTML + recorded demo video
+- **Flash the ESP32-S3** and run the phone → tablet → laptop flow once (see `edge/HARDWARE_GUIDE.md` + `edge/FLASH-CHECKLIST.md`)
+- **Record the backup demo video** (see `VIDEO.md`)
+- **Rehearse the demo script twice** (see `DEMO_SCRIPT.md`)
+- **Backups to USB + Google Drive** (repo zip + video + deck)
 - **Final** — README, requirements.txt, dry run, backups (USB + Drive)
 
 ## ▶ HOW TO SEE IT RIGHT NOW
