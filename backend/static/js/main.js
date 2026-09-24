@@ -354,14 +354,17 @@ async function loadIntel(o) {
     });
     renderIntel(o, r);
   } catch (e) { toast("Intel failed: " + e.message); }
-  try {
-    const s = await api("/api/supply-route", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lat: o.lat, lon: o.lon }),
-    });
-    supplyData = s; supplyAir = false;
-    renderSupplyRoute();
-  } catch (e) { console.error("supply route failed:", e); }
+  // Supply route: from the supply hub (hospital) to the MMU camp
+  if (o.supply_hub) {
+    try {
+      const s = await api("/api/supply-route", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lat: o.lat, lon: o.lon }),
+      });
+      supplyData = s; supplyAir = false;
+      renderSupplyRoute();
+    } catch (e) { console.error("supply route failed:", e); }
+  }
 }
 
 function renderSupplyRoute() {
@@ -388,9 +391,9 @@ function toggleSupplyMode() { supplyAir = !supplyAir; renderSupplyRoute(); }
 function renderIntel(o, r) {
   const p = document.getElementById("intel-panel");
   if (!p) return;
-  let html = `<div class="meta">${o.outpost_id} · ${r.district}, ${r.state}</div>`;
+  let html = `<div class="meta"><b>${o.outpost_id}</b> · ${r.district}, ${r.state}</div>`;
   if (r.diseases && r.diseases.length) {
-    html += `<div style="margin-top:6px"><b>🦠 Endemic indicators (${r.survey})</b></div>`;
+    html += `<div style="margin-top:6px"><b>🦠 Health risks in this area (${r.survey})</b></div>`;
     r.diseases.forEach((d) => { html += `<div class="meta">• ${d.indicator}: <b>${d.value}%</b></div>`; });
   }
   html += `<div style="margin-top:8px"><b>💊 Medicine stock</b> <span class="meta">(simulated)</span></div>` +
@@ -401,10 +404,15 @@ function renderIntel(o, r) {
   });
   html += `</table>`;
   if (r.sourcing && r.sourcing.length) {
-    html += `<div style="margin-top:6px"><b>🚚 Cheap sourcing</b></div>`;
+    html += `<div style="margin-top:6px"><b>🚚 Restock from</b></div>`;
     r.sourcing.forEach((s) => { html += `<div class="meta">• ${s.medicine} → ${s.from} (${s.note})</div>`; });
   }
+  if (o.supply_hub) {
+    html += `<div style="margin-top:6px"><b>📦 Supply hub</b></div>` +
+            `<div class="meta">${o.supply_hub} · ${o.supply_distance_km} km · ${o.supply_info}</div>`;
+  }
   p.innerHTML = html;
+  p.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 /* ------------------------------------------------------------------ modes */
@@ -476,19 +484,21 @@ function drawOutposts(r, minutes) {
     const mk = L.marker([o.lat, o.lon], {
       icon: L.divIcon({ className: "outpost-star", html: "★", iconSize: [28, 28], iconAnchor: [14, 14] }),
     });
-    mk.bindTooltip(`<b>${o.outpost_id}</b> · ${o.staged_at ?? ""}`, { permanent: true, direction: "top", offset: [0, -14] });
+    mk.bindTooltip(`<b>${o.outpost_id}</b> · Mobile Clinic`, { permanent: true, direction: "top", offset: [0, -14] });
+    const opIdx = r.outposts.indexOf(o);
     mk.bindPopup(
-      `<div style="min-width:260px">` +
-      `<b style="font-size:14px;color:#22d3a7">${o.outpost_id}</b><br>` +
-      `<b>${o.staged_at ?? "cluster centroid"}</b><br>` +
-      `<span style="font-size:10px;color:#8ea0c0">${o.staged_info ?? ""}</span><hr>` +
+      `<div style="min-width:280px">` +
+      `<b style="font-size:14px;color:#22d3a7">⛺ ${o.outpost_id} — Mobile Clinic Camp</b><br>` +
+      `<span style="font-size:10px;color:#8ea0c0">Population-weighted center of underserved villages</span><hr>` +
       `<b>Serves ${fmt(o.circuit_villages)} villages</b> (${fmt(o.circuit_population)} people)<br>` +
       `📍 Avg distance to villages: <b>${o.avg_distance_km ?? "—"} km</b><br>` +
       `📍 Farthest village: <b>${o.max_distance_km ?? "—"} km</b><br>` +
       `⏱️ Villages within 30-min reach: <b>${o.villages_within_30min ?? "—"}</b><br>` +
       `🏥 Anchor district: ${o.anchor_district}<br>` +
       `📊 Health need score: ${o.circuit_mean_need}<hr>` +
-      `<button class="popup-btn" onclick='loadIntel(${JSON.stringify(o)})'>🧪 Medical intel & supply route</button>` +
+      `<b style="font-size:11px">📦 Supply hub: ${o.supply_hub ?? "—"}</b><br>` +
+      `<span style="font-size:10px;color:#8ea0c0">${o.supply_info ?? ""} · ${o.supply_distance_km ?? "—"} km away</span><hr>` +
+      `<button class="popup-btn" onclick="loadIntel(outposts[${opIdx}])">🧪 Health risks, medicines & supply routes</button>` +
       `</div>`
     );
     mk.on("click", (e) => {
@@ -512,7 +522,7 @@ function drawOutposts(r, minutes) {
 
     let clinicRows = r.outposts.map((o) =>
       `<tr><td><b>${o.outpost_id}</b></td>` +
-      `<td>${(o.staged_at ?? "—").substring(0, 22)}</td>` +
+      `<td>${(o.supply_hub ?? "—").substring(0, 20)}</td>` +
       `<td style="text-align:center">${o.circuit_villages}</td>` +
       `<td style="text-align:center">${o.circuit_population > 1e6 ? (o.circuit_population / 1e6).toFixed(1) + "M" : fmt(o.circuit_population)}</td>` +
       `<td style="text-align:center">${o.avg_distance_km ?? "—"}km</td>` +
@@ -533,7 +543,7 @@ function drawOutposts(r, minutes) {
       `<div class="stat"><div class="v">${avgD.toFixed(0)}km</div><div class="l">avg dist</div></div>` +
       `</div>` +
       `<table style="width:100%;border-collapse:collapse;font-size:10px;margin-top:10px">` +
-      `<tr style="color:var(--muted)"><th>Clinic</th><th>Based at</th><th>Villages</th><th>People</th><th>Avg km</th><th>Max km</th></tr>` +
+      `<tr style="color:var(--muted)"><th>Clinic</th><th>Supply hub</th><th>Villages</th><th>People</th><th>Avg km</th><th>Max km</th></tr>` +
       clinicRows + `</table>` +
       `<div class="meta" style="margin-top:8px">Area: ${areaV.length} villages · ${areaUnder} underserved · ${stillOut > 0 ? stillOut + " still uncovered" : "fully covered!"}</div>` +
       `<div class="meta">Click any ⭐ for medical intel · supply routes · medicine stock</div>`;

@@ -250,10 +250,10 @@ def optimize(fleet_size: int = 3, max_minutes: int = 30,
         chosen.append(j)
         covered_sched[cluster_indices[j]] = True
 
-    # ---- re-anchor each outpost to a REAL place ------------------------------
-    # Population-weighted centroid (not geometric) → then nearest real facility.
-    # An MMU stages from an actual health facility (government directory) —
-    # never an arbitrary map point. Fallback: the highest-need village.
+    # ---- place each MMU at the population-weighted centroid ----------------
+    # MMUs are MOBILE — they set up camp where the need is (village square,
+    # school, community center), NOT at a hospital. The nearest hospital is
+    # the SUPPLY HUB for restocking and emergency dispatch.
     fac_coords = fac[["lat", "lon"]].to_numpy()
     outposts = []
     final_positions = []
@@ -263,31 +263,24 @@ def optimize(fleet_size: int = 3, max_minutes: int = 30,
         circuit = v.iloc[idx]
         district = circuit["District"].mode()
 
-        # Population-weighted centroid: the outpost gravitates toward where
-        # people actually live, not the geometric middle of the cluster
+        # Population-weighted centroid = where the MMU camps
         c_pop = pop[idx]
         total_pop = c_pop.sum()
         if total_pop > 0:
-            wlat = float((circuit["Latitude"].to_numpy() * c_pop).sum() / total_pop)
-            wlon = float((circuit["Longitude"].to_numpy() * c_pop).sum() / total_pop)
+            o_lat = float((circuit["Latitude"].to_numpy() * c_pop).sum() / total_pop)
+            o_lon = float((circuit["Longitude"].to_numpy() * c_pop).sum() / total_pop)
         else:
-            wlat, wlon = float(c["lat"]), float(c["lon"])
+            o_lat, o_lon = float(c["lat"]), float(c["lon"])
 
-        d_fac = pairwise_haversine_km(np.array([[wlat, wlon]]), fac_coords)[0]
+        # Nearest real hospital = supply hub + emergency dispatch point
+        d_fac = pairwise_haversine_km(np.array([[o_lat, o_lon]]), fac_coords)[0]
         fi = int(np.argmin(d_fac))
         f_row = fac.iloc[fi]
-        if d_fac[fi] <= 50.0:
-            o_lat, o_lon = float(f_row["lat"]), float(f_row["lon"])
-            staged_at = str(f_row["Hospital_Name"])[:80]
-            staged_kind = "facility"
-            emerg = " · ⚡ emergency" if bool(f_row["has_emergency"]) else ""
-            staged_info = f"{int(f_row['beds'])} beds · {int(f_row['doctors'])} doctors{emerg}"
-        else:
-            hv = circuit.loc[circuit["need_score"].idxmax()]
-            o_lat, o_lon = float(hv["Latitude"]), float(hv["Longitude"])
-            staged_at = f"{hv['Village_ID']} (highest-need village)"
-            staged_kind = "village"
-            staged_info = f"population {int(hv['Population']):,}"
+        supply_name = str(f_row["Hospital_Name"])[:80]
+        supply_dist = round(float(d_fac[fi]), 1)
+        supply_info = f"{int(f_row['beds'])} beds · {int(f_row['doctors'])} doctors"
+        if bool(f_row["has_emergency"]):
+            supply_info += " · ⚡ emergency"
 
         final_positions.append((o_lat, o_lon))
         # Distance metrics: how far are the served villages from this outpost?
@@ -300,9 +293,10 @@ def optimize(fleet_size: int = 3, max_minutes: int = 30,
             "outpost_id": f"MMU-{rank:02d}",
             "lat": round(o_lat, 5),
             "lon": round(o_lon, 5),
-            "staged_at": staged_at,
-            "staged_kind": staged_kind,
-            "staged_info": staged_info,
+            "camp_type": "mobile_clinic",
+            "supply_hub": supply_name,
+            "supply_distance_km": supply_dist,
+            "supply_info": supply_info,
             "circuit_villages": int(len(idx)),
             "circuit_population": int(pop[idx].sum()),
             "circuit_mean_need": round(float(c["mean_need"]), 3),
