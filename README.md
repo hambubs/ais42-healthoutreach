@@ -127,7 +127,7 @@ edge/esp32_gateway/    ──► ESP32-S3 Arduino sketch: Captive portal, Little
 
 ## 👥 Team AIS-42
 
-- **Sahil Thanveer Rai** — System Architect & Hardware/IoT Lead
-- **Ashmita Roy** — Data Science & Frontend Integration
-- **Subhalaxmi Sahoo** — Epidemiological Analysis & GIS Mapping
-- **Punit Kumar** — Logistics Modeling & Presentation Lead
+- **Sahil Thanveer Rai** 
+- **Ashmita Roy** 
+- **Subhalaxmi Sahoo** 
+- **Punit Kumar** 
